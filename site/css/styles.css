@@ -1,0 +1,361 @@
+/* Reset & base */
+*{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;width:100%}
+body{height:100%;width:100%;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;line-height:1.6;color:#eaf6fb;background:#000;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.container{max-width:1100px;margin:0 auto;padding:0 20px}
+img{max-width:100%;height:auto;display:block}
+
+/* Nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:40;background:linear-gradient(180deg,rgba(0,0,0,0.2),rgba(221, 201, 201, 0.05));backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,0.03)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 20px}
+.brand{font-size:24px;font-weight:800;color:#fff;letter-spacing:-0.5px;text-decoration:none;transition:color 300ms ease;cursor:pointer}
+.brand:hover{color:#00d4ff}
+.brand img{height:36px}
+.nav-links{list-style:none;display:flex;gap:18px;align-items:center}
+.nav-links a{color:#e6eef7;text-decoration:none;font-weight:600;opacity:.9}
+.nav-toggle{display:none;background:none;border:0;color:#e6eef7;font-size:22px}
+
+/* Hero */
+.hero{
+  padding:120px 0 80px;
+  position:relative;
+  overflow:hidden;
+  color: #eaf6fb;
+}
+/* 半透明遮罩以保证文字可读性 */
+.hero::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(177, 185, 192, 0.45));z-index:0}
+.hero-inner{display:flex;flex-direction:column;gap:18px;position:relative;z-index:2}
+.hero-title{font-size:48px;color:#fff;font-weight:800;letter-spacing:-1px}
+.hero-title .accent{color:#00d4ff}
+.hero-sub{color:#bcd3df;max-width:720px}
+.hero-type{color:#9bd1e3;font-weight:600}
+.hero-cta{display:flex;gap:12px;margin-top:10px}
+.btn{display:inline-block;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:700;border:1px solid rgba(230, 208, 208, 0.06)}
+.btn.primary{background:linear-gradient(90deg,#00d4ff,#3bc9ff);color:#023046}
+.btn.ghost{background:transparent;color:#d8eef6;border:1px solid rgba(255,255,255,0.06)}
+
+/* Hero decoration */
+.hero-decor{position:absolute;right:-120px;bottom:-40px;width:600px;height:600px;background:radial-gradient(circle at 30% 30%, rgba(0,212,255,0.12), transparent 20%), radial-gradient(circle at 70% 70%, rgba(59,201,255,0.08), transparent 30%);filter:blur(40px);transform:rotate(10deg);opacity:.9}
+
+/* Sections */
+.section{padding:72px 0;position:relative}
+/* 为每个 section 的 container 添加半透明面板，提升下方内容可读性 */
+.section > .container{background:rgba(3,6,10,0.36);padding:28px;border-radius:12px;box-shadow:0 12px 40px rgba(2,6,10,0.55);backdrop-filter:blur(6px)}
+.grid{display:grid;gap:22px}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.10));border-radius:12px;padding:24px;color:#eaf6fb;border:1px solid rgba(255,255,255,0.16);box-shadow:0 12px 30px rgba(2,6,10,0.6);backdrop-filter:blur(8px)}
+.card h3{margin-bottom:8px}
+
+/* Stats */
+.dark{background:linear-gradient(180deg,rgba(0,0,0,0.58),rgba(3,6,10,0.6));backdrop-filter:blur(6px);border-radius:10px;padding:18px 0} 
+.stats{display:flex;gap:40px;justify-content:space-around;align-items:center}
+.stat{text-align:center;color:#e6f6fb}
+.stat .num{font-size:36px;font-weight:800;color:#fff}
+.stat .label{opacity:.8}
+
+/* Footer */
+.footer{padding:28px 0;border-top:1px solid rgba(255,255,255,0.06);color:#99cbd9;background:rgba(3,6,10,0.28);backdrop-filter:blur(4px)}
+
+/* Reveal animations */
+.reveal{opacity:0;transform:translateY(18px);transition:all 700ms cubic-bezier(.2,.9,.2,1)}
+.reveal.active{opacity:1;transform:translateY(0)}
+
+/* Dynamic animations for left hero section */
+@keyframes fadeInDown{
+  from{opacity:0;transform:translateY(-20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes fadeInUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes slideInLeft{
+  from{opacity:0;transform:translateX(-30px)}
+  to{opacity:1;transform:translateX(0)}
+}
+@keyframes shimmer{
+  0%{background-position:-1000px 0}
+  100%{background-position:1000px 0}
+}
+
+.login-hero{animation:slideInLeft 0.8s ease-out 0.1s both}
+.login-title{animation:fadeInDown 0.9s ease-out 0.2s both;position:relative;overflow:hidden}
+.login-title::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
+  width:100%;
+  animation:shimmer 3s infinite;
+}
+.login-sub{animation:fadeInUp 0.8s ease-out 0.4s both}
+.login-meta{animation:fadeInUp 0.8s ease-out 0.6s both}
+.pill{animation:fadeInUp 0.6s ease-out;animation-fill-mode:both;transition:all 300ms ease}
+.pill:nth-child(1){animation-delay:0.7s}
+.pill:nth-child(2){animation-delay:0.75s}
+.pill:nth-child(3){animation-delay:0.8s}
+.pill:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,212,255,0.25);background:rgba(0,212,255,0.15)}
+
+.brand-mark{animation:fadeInDown 0.8s ease-out 0s both}
+.brand-mark img:hover{transform:scale(1.05);transition:transform 400ms ease}
+
+/* Responsive */
+@media (max-width:900px){
+  .hero-title{font-size:36px}
+  .grid-3{grid-template-columns:1fr}
+  .nav-links{display:none}
+  .nav-toggle{display:block}
+  .hero{padding-top:100px}
+}
+
+/* Small polish */
+.contact-grid{display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start}
+.contact-form input,.contact-form textarea{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:#041620;margin-bottom:10px}
+.contact-form button{width:100%}
+
+/* Tiny typing caret */
+#typed{position:relative}
+#typed::after{content:'|';margin-left:6px;opacity:.8;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* accessibility focus */
+a:focus{outline:2px solid rgba(0,212,255,0.2);outline-offset:2px}
+
+/* ===== FULLSCREEN CAROUSEL ===== */
+.carousel-fullscreen {
+  width: 100%;
+  height: 100vh;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+}
+
+.carousel-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  overflow: hidden;
+}
+
+.carousel-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 600ms cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.carousel-slide {
+  flex: 0 0 100%;
+  width: 100vw;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a0a;
+}
+
+.carousel-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #0a0a0a;
+  display: block;
+}
+
+/* 导航按钮 */
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 300ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  backdrop-filter: blur(8px);
+}
+
+.carousel-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-50%) scale(1.15);
+}
+
+.carousel-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.carousel-prev {
+  left: 30px;
+}
+
+.carousel-next {
+  right: 30px;
+}
+
+/* 指示点 */
+.carousel-dots {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 20;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 90%;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 300ms cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.dot:hover {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.dot.active {
+  background: rgba(255, 255, 255, 0.95);
+  width: 30px;
+  border-radius: 5px;
+}
+
+/* 中心覆盖层 */
+.carousel-overlay-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 15;
+  pointer-events: none;
+}
+
+.carousel-title {
+  font-size: 64px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 4px 40px rgba(0, 0, 0, 0.8);
+  margin: 0 0 16px 0;
+  letter-spacing: -2px;
+}
+
+.carousel-subtitle {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .carousel-prev {
+    left: 20px;
+  }
+
+  .carousel-next {
+    right: 20px;
+  }
+
+  .carousel-title {
+    font-size: 48px;
+  }
+
+  .carousel-subtitle {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .carousel-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .carousel-prev {
+    left: 12px;
+  }
+
+  .carousel-next {
+    right: 12px;
+  }
+
+  .carousel-title {
+    font-size: 36px;
+  }
+
+  .carousel-subtitle {
+    font-size: 14px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .dot.active {
+    width: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .carousel-prev {
+    left: 8px;
+  }
+
+  .carousel-next {
+    right: 8px;
+  }
+
+  .carousel-title {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+
+  .carousel-subtitle {
+    font-size: 12px;
+  }
+
+  .carousel-dots {
+    bottom: 20px;
+    gap: 6px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .dot.active {
+    width: 18px;
+  }
+}

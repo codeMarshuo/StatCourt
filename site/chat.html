@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AI助手 · StatCourt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0a1929 0%, #1a2027 50%, #0d1b2a 100%);
+      color: #eaf6fb;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(10, 25, 41, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-inner {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #00d4ff;
+      letter-spacing: -0.5px;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      color: #bcd3df;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: #00d4ff;
+    }
+
+    .chat-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 100px 20px 40px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .chat-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .chat-subtitle {
+      font-size: 1rem;
+      color: #9bd1e3;
+    }
+
+    .chat-card {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      max-height: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .chat-messages::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .chat-messages::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: rgba(0, 212, 255, 0.3);
+      border-radius: 4px;
+    }
+
+    .message {
+      display: flex;
+      gap: 1rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.user {
+      flex-direction: row-reverse;
+    }
+
+    .message-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .message.assistant .message-avatar {
+      background: linear-gradient(135deg, #00d4ff, #3bc9ff);
+    }
+
+    .message.user .message-avatar {
+      background: linear-gradient(135deg, #4ade80, #22c55e);
+    }
+
+    .message-content {
+      max-width: 70%;
+      padding: 1rem 1.25rem;
+      border-radius: 1rem;
+      line-height: 1.6;
+    }
+
+    .message.assistant .message-content {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .message.user .message-content {
+      background: rgba(0, 212, 255, 0.15);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+    }
+
+    .message-time {
+      font-size: 0.75rem;
+      color: #6b7c8a;
+      margin-top: 0.5rem;
+    }
+
+    .chat-input-area {
+      padding: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      gap: 1rem;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 1rem 1.25rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.75rem;
+      color: #fff;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: none;
+      min-height: 50px;
+      max-height: 150px;
+      transition: all 0.3s;
+    }
+
+    .chat-input:focus {
+      outline: none;
+      border-color: rgba(0, 212, 255, 0.5);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .chat-input::placeholder {
+      color: #6b7c8a;
+    }
+
+    .send-btn {
+      padding: 1rem 2rem;
+      background: linear-gradient(90deg, #00d4ff, #3bc9ff);
+      border: none;
+      border-radius: 0.75rem;
+      color: #023046;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .send-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .welcome-message {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: #9bd1e3;
+    }
+
+    .welcome-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .welcome-text {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .welcome-hint {
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+
+    .footer {
+      background: rgba(10, 25, 41, 0.8);
+      backdrop-filter: blur(20px);
+      padding: 2rem 0;
+      text-align: center;
+      color: #9bd1e3;
+      font-size: 0.875rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .chat-title {
+        font-size: 2rem;
+      }
+
+      .config-row {
+        grid-template-columns: 1fr;
+      }
+
+      .message-content {
+        max-width: 85%;
+      }
+
+      .chat-input-area {
+        flex-direction: column;
+      }
+
+      .send-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="./index.html" class="brand">StatCourt</a>
+      <ul class="nav-links">
+        <li><a href="./index.html">首页</a></li>
+        <li><a href="./data.html">数据</a></li>
+        <li><a href="./teams.html">球队</a></li>
+        <li><a href="./visualization.html">可视化</a></li>
+        <li><a href="./chat.html" class="active">AI助手</a></li>
+        <li><a href="./advanced.html">高阶数据</a></li>
+        <li><a href="./compare.html">对比</a></li>
+        <li><a href="./demo.html">3D展示</a></li>
+        <li><a href="./demo-advanced.html">3D高阶</a></li>
+        <li><a href="./map.html">球队地图</a></li>
+        <li><a href="./match.html">比赛模拟</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="chat-container">
+    <div class="chat-header">
+      <h1 class="chat-title">AI 助手</h1>
+      <p class="chat-subtitle">智能对话 · NBA数据分析专家</p>
+    </div>
+
+    <div class="chat-card">
+      <div class="chat-messages" id="chatMessages">
+        <div class="welcome-message">
+          <div class="welcome-icon">🏀</div>
+          <p class="welcome-text">你好！我是NBA数据分析助手</p>
+          <p class="welcome-hint">请先配置API信息，然后开始对话吧！</p>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <textarea id="userInput" class="chat-input" placeholder="输入你的问题..." rows="1"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+          <span>发送</span>
+          <span>→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Copyright ©2026 All rights reserved | StatCourt · NBA数据球场</p>
+    </div>
+  </footer>
+
+  <script>
+    const config = {
+      endpoint: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+      apiKey: 'd094c09c2c7e47e2b4eba1f9a53a77b7.3fdg6FlIawgBcUEA',
+      model: 'glm-5'
+    };
+
+    let messages = [];
+
+    function getCurrentTime() {
+      const now = new Date();
+      return now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function addMessage(role, content) {
+      const messagesContainer = document.getElementById('chatMessages');
+      
+      const welcomeMsg = messagesContainer.querySelector('.welcome-message');
+      if (welcomeMsg) {
+        welcomeMsg.remove();
+      }
+
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${role}`;
+      
+      const avatar = role === 'assistant' ? '🤖' : '👤';
+      
+      messageDiv.innerHTML = `
+        <div class="message-avatar">${avatar}</div>
+        <div class="message-content">
+          <div>${content}</div>
+          <div class="message-time">${getCurrentTime()}</div>
+        </div>
+      `;
+
+      messagesContainer.appendChild(messageDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function addLoadingMessage() {
+      const messagesContainer = document.getElementById('chatMessages');
+      
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message assistant';
+      messageDiv.id = 'loadingMessage';
+      
+      messageDiv.innerHTML = `
+        <div class="message-avatar">🤖</div>
+        <div class="message-content">
+          <div>正在思考中...</div>
+        </div>
+      `;
+
+      messagesContainer.appendChild(messageDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function removeLoadingMessage() {
+      const loadingMsg = document.getElementById('loadingMessage');
+      if (loadingMsg) {
+        loadingMsg.remove();
+      }
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('userInput');
+      const message = input.value.trim();
+
+      if (!message) return;
+
+      if (!config.apiKey || config.apiKey === 'YOUR_API_KEY_HERE') {
+        addMessage('assistant', '请先在代码中配置API Key！找到 config.apiKey 并替换为您的密钥。');
+        return;
+      }
+
+      addMessage('user', message);
+      input.value = '';
+
+      messages.push({
+        role: 'user',
+        content: message
+      });
+
+      const sendBtn = document.getElementById('sendBtn');
+      sendBtn.disabled = true;
+
+      addLoadingMessage();
+
+      try {
+        const response = await fetch(config.endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.apiKey}`
+          },
+          body: JSON.stringify({
+            model: config.model,
+            messages: [
+              {
+                role: 'system',
+                content: '你是NBA数据分析专家，专注于NBA篮球数据分析和统计。请用简洁专业的中文回答用户问题。'
+              },
+              ...messages
+            ],
+            temperature: 0.7,
+            stream: false
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error?.message || `API请求失败: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const assistantMessage = data.choices[0].message.content;
+
+        removeLoadingMessage();
+        addMessage('assistant', assistantMessage);
+
+        messages.push({
+          role: 'assistant',
+          content: assistantMessage
+        });
+
+      } catch (error) {
+        removeLoadingMessage();
+        addMessage('assistant', `抱歉，发生了错误：${error.message}`);
+        console.error('API调用错误:', error);
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    document.getElementById('userInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    document.getElementById('userInput').addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+    });
+
+    function getUrlParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+      const prompt = getUrlParam('prompt');
+      if (prompt) {
+        document.getElementById('userInput').value = decodeURIComponent(prompt);
+        setTimeout(() => {
+          sendMessage();
+        }, 500);
+      }
+    });
+  </script>
+  <script src="./js/gsap-animations.js"></script>
+</body>
+</html>

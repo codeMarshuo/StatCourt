@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>数据可视化 · StatCourt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0a1929 0%, #1a2027 50%, #0d1b2a 100%);
+      color: #eaf6fb;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(10, 25, 41, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-inner {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #00d4ff;
+      letter-spacing: -0.5px;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      color: #bcd3df;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: #00d4ff;
+    }
+
+    .section {
+      padding: 100px 0 40px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+      font-size: 1rem;
+      color: #9bd1e3;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .chart-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.5rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .chart-card.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .chart-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .chart-title::before {
+      content: '';
+      width: 4px;
+      height: 20px;
+      background: linear-gradient(180deg, #00d4ff, #3bc9ff);
+      border-radius: 2px;
+    }
+
+    .chart-container {
+      width: 100%;
+      height: 400px;
+    }
+
+    .chart-container.large {
+      height: 500px;
+    }
+
+    .footer {
+      background: rgba(10, 25, 41, 0.8);
+      backdrop-filter: blur(20px);
+      padding: 2rem 0;
+      text-align: center;
+      color: #9bd1e3;
+      font-size: 0.875rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    @media (max-width: 1200px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 2rem;
+      }
+
+      .chart-container {
+        height: 300px;
+      }
+
+      .chart-container.large {
+        height: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="./index.html" class="brand">StatCourt</a>
+      <ul class="nav-links">
+        <li><a href="./index.html">首页</a></li>
+        <li><a href="./data.html">数据</a></li>
+        <li><a href="./teams.html">球队</a></li>
+        <li><a href="./visualization.html" class="active">可视化</a></li>
+        <li><a href="./chat.html">AI助手</a></li>
+        <li><a href="./advanced.html">高阶数据</a></li>
+        <li><a href="./compare.html">对比</a></li>
+        <li><a href="./demo.html">3D展示</a></li>
+        <li><a href="./demo-advanced.html">3D高阶</a></li>
+        <li><a href="./map.html">球队地图</a></li>
+        <li><a href="./match.html">比赛模拟</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="section">
+    <div class="container">
+      <div class="page-header">
+        <h1 class="page-title">NBA 数据可视化</h1>
+        <p class="page-subtitle">2025-2026赛季 · 多维度数据分析</p>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card full-width">
+          <h3 class="chart-title">球员得分排行榜 TOP 20</h3>
+          <div id="scoreRankChart" class="chart-container large"></div>
+        </div>
+
+        <div class="chart-card">
+          <h3 class="chart-title">球队胜率分布</h3>
+          <div id="teamWinRateChart" class="chart-container"></div>
+        </div>
+
+        <div class="chart-card">
+          <h3 class="chart-title">球队场均得分对比</h3>
+          <div id="teamScoreChart" class="chart-container"></div>
+        </div>
+
+        <div class="chart-card full-width">
+          <h3 class="chart-title">三分球数据散点图（命中数>50）</h3>
+          <div id="threePointChart" class="chart-container large"></div>
+        </div>
+
+        <div class="chart-card">
+          <h3 class="chart-title">球员篮板助攻对比 TOP 15</h3>
+          <div id="reboundAssistChart" class="chart-container"></div>
+        </div>
+
+        <div class="chart-card">
+          <h3 class="chart-title">球队数据雷达图 TOP 5</h3>
+          <div id="teamRadarChart" class="chart-container"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Copyright ©2026 All rights reserved | StatCourt · NBA数据球场</p>
+    </div>
+  </footer>
+
+  <script>
+    const API_BASE_URL = 'http://localhost:8081';
+    let nbaData = {};
+
+    async function loadData() {
+      try {
+        const response = await axios({
+          method: 'GET',
+          url: `${API_BASE_URL}/api/data`,
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const res = response.data;
+        if (res && (res.code === 200 || res.code === 0)) {
+          nbaData = res.data || {};
+          initAllCharts();
+        }
+      } catch (error) {
+        console.error('加载数据失败:', error);
+      }
+    }
+
+    function initAllCharts() {
+      initScoreRankChart();
+      initTeamWinRateChart();
+      initTeamScoreChart();
+      initThreePointChart();
+      initReboundAssistChart();
+      initTeamRadarChart();
+    }
+
+    function initScoreRankChart() {
+      const chart = echarts.init(document.getElementById('scoreRankChart'));
+      
+      if (!nbaData.players || nbaData.players.length === 0) return;
+
+      const sorted = [...nbaData.players]
+        .sort((a, b) => (b.score || b.Score || 0) - (a.score || a.Score || 0))
+        .slice(0, 20)
+        .reverse();
+
+      const names = sorted.map(p => p.playerName || p.PlayerName || '未知');
+      const scores = sorted.map(p => p.score || p.Score || 0);
+
+      const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' },
+          backgroundColor: 'rgba(0, 20, 40, 0.95)',
+          borderColor: '#00d4ff',
+          borderWidth: 1,
+          textStyle: { color: '#fff' }
+        },
+        grid: {
+          left: '3%',
+          right: '8%',
+          bottom: '3%',
+          top: '3%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'value',
+          name: '得分',
+          nameTextStyle: { color: '#9bd1e3' },
+          axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.3)' } },
+          axisLabel: { color: '#bcd3df' },
+          splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }
+        },
+        yAxis: {
+          type: 'category',
+          data: names,
+          axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.3)' } },
+          axisLabel: { color: '#bcd3df', fontSize: 12 }
+        },
+        series: [{
+          type: 'bar',
+          data: scores,
+          itemStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+              { offset: 0, color: '#00d4ff' },
+              { offset: 1, color: '#3bc9ff' }
+            ]),
+            borderRadius: [0, 4, 4, 0]
+          },
+          emphasis: {
+            itemStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                { offset: 0, color: '#3bc9ff' },
+                { offset: 1, color: '#00d4ff' }
+              ])
+            }
+          },
+          label: {
+            show: true,
+            position: 'right',
+            color: '#00d4ff',
+            fontWeight: 600
+          }
+        }]
+      };
+
+      chart.setOption(option);
+      window.addEventListener('resize', () => chart.resize());
+    }
+
+    function initTeamWinRateChart() {
+      const chart = echarts.init(document.getElementById('teamWinRateChart'));
+      
+      if (!nbaData.teams || nbaData.teams.length === 0) return;
+
+      const top10 = [...nbaData.teams]
+        .sort((a, b) => {
+          const winA = parseFloat((a.winper || a.Winper || '0%').replace('%', ''));
+          const winB = parseFloat((b.winper || b.Winper || '0%').replace('%', ''));
+          return winB - winA;
+        })
+        .slice(0, 10);
+
+      const data = top10.map(t => ({
+        name: (t.team || t.Team || '未知').split(' ').pop(),
+        value: parseFloat((t.winper || t.Winper || '0%').replace('%', ''))
+      }));
+
+      const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+          trigger: 'item',
+          formatter: '{b}: {c}%',
+          backgroundColor: 'rgba(0, 20, 40, 0.95)',
+          borderColor: '#00d4ff',
+          borderWidth: 1,
+          textStyle: { color: '#fff' }
+        },
+        legend: {
+          orient: 'vertical',
+          right: 10,
+          top: 'center',
+          textStyle: { color: '#bcd3df', fontSize: 11 }
+        },
+        series: [{
+          type: 'pie',
+          radius: ['40%', '70%'],
+          center: ['40%', '50%'],
+          avoidLabelOverlap: false,
+          itemStyle: {
+            borderRadius: 8,
+            borderColor: '#0a1929',
+            borderWidth: 2
+          },
+          label: { show: false },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 14,
+              fontWeight: 'bold',
+              color: '#fff'
+            }
+          },
+          data: data,
+          color: ['#00d4ff', '#3bc9ff', '#5dd3ff', '#7fe0ff', '#a1edff', 
+                  '#ff6b6b', '#ff8787', '#ffa3a3', '#ffbfbf', '#ffdbdb']
+        }]
+      };
+
+      chart.setOption(option);
+      window.addEventListener('resize', () => chart.resize());
+    }
+
+    function initTeamScoreChart() {
+      const chart = echarts.init(document.getElementById('teamScoreChart'));
+      
+      if (!nbaData.teams || nbaData.teams.length === 0) return;
+
+      const sorted = [...nbaData.teams]
+        .sort((a, b) => (b.Score || b.score || 0) - (a.Score || a.score || 0))
+        .slice(0, 10);
+
+      const names = sorted.map(t => (t.team || t.Team || '未知').split(' ').pop());
+      const scores = sorted.map(t => t.Score || t.score || 0);
+
+      const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' },
+          backgroundColor: 'rgba(0, 20, 40, 0.95)',
+          borderColor: '#00d4ff',
+          borderWidth: 1,
+          textStyle: { color: '#fff' }
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '15%',
+          top: '10%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'category',
+          data: names,
+          axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.3)' } },
+          axisLabel: { color: '#bcd3df', rotate: 30, fontSize: 11 }
+        },
+        yAxis: {
+          type: 'value',
+          name: '场均得分',
+          nameTextStyle: { color: '#9bd1e3' },
+          axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.3)' } },
+          axisLabel: { color: '#bcd3df' },
+          splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }
+        },
+        series: [{
+          type: 'bar',
+          data: scores,
+          itemStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: '#ff6b6b' },
+              { offset: 1, color: '#ff8787' }
+            ]),
+            borderRadius: [4, 4, 0, 0]
+          },
+          label: {
+            show: true,
+            position: 'top',
+            color: '#ff6b6b',
+            fontWeight: 600,
+            fontSize: 11
+          }
+        }]
+      };
+
+      chart.setOption(option);
+      window.addEventListener('resize', () => chart.resize());
+    }
+
+    function initThreePointChart() {
+      const chart = echarts.init(document.getElementById('threePointChart'));
+      
+      if (!nbaData.players || nbaData.players.length === 0) return;
+
+      const players = nbaData.players.filter(p => {
+        const made = parseInt(p.threePointFieldGoals || p.ThreePointFieldGoals) || 0;
+        const pctStr = p.threePointShootingPer || p.ThreePointShootingPer || '0%';
+        const pct = parseFloat(pctStr.replace('%', '')) || 0;
+        return made > 50 && pct > 0;
+      });
+
+      if (players.length === 0) return;
+
+      const maxMade = Math.max(...players.map(p => parseInt(p.threePointFieldGoals || p.ThreePointFieldGoals) || 0));
+      const maxPct = Math.min(60, Math.max(...players.map(p => {
+        const pctStr = p.threePointShootingPer || p.ThreePointShootingPer || '0%';
+        return parseFloat(pctStr.replace('%', '')) || 0;
+      })));
+
+      const maxMadePlayer = players.find(p => parseInt(p.threePointFieldGoals || p.ThreePointFieldGoals) === maxMade);
+      const maxPctPlayer = players.find(p => {
+        const pctStr = p.threePointShootingPer || p.ThreePointShootingPer || '0%';
+        return parseFloat(pctStr.replace('%', '')) === maxPct;
+      });
+
+      const normalData = [];
+      const rippleData = [];
+
+      players.forEach(player => {
+        const made = parseInt(player.threePointFieldGoals || player.ThreePointFieldGoals) || 0;
+        const pctStr = player.threePointShootingPer || player.ThreePointShootingPer || '0%';
+        const pct = parseFloat(pctStr.replace('%', '')) || 0;
+        const name = player.playerName || player.PlayerName || '未知';
+        
+        const dataPoint = [made, pct, name, player.team || player.Team || ''];
+
+        if (player === maxMadePlayer || player === maxPctPlayer) {
+          rippleData.push(dataPoint);
+        } else {
+          normalData.push(dataPoint);
+        }
+      });
+
+      const madeInterval = Math.ceil(maxMade / 10 / 10) * 10;
+      const pctInterval = Math.ceil(maxPct / 10);
+
+      const option = {
+        backgroundColor: 'transparent',
+        title: {
+          text: '三分球产量与效率分析',
+          subtext: `共筛选出 ${players.length} 名球员（三分命中数>50）`,
+          left: 'center',
+          top: 10,
+          textStyle: { color: '#fff', fontSize: 18, fontWeight: 600 },
+          subtextStyle: { color: '#9bd1e3', fontSize: 13 }
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: function(params) {
+            const data = params.data;
+            const label = params.seriesName === '最高产量/命中率球员' ? '⭐ ' : '';
+            return `${label}${data[2]}<br/>球队: ${data[3]}<br/>三分命中数: ${data[0]}<br/>三分命中率: ${data[1]}%`;
+          },
+          backgroundColor: 'rgba(0, 20, 40, 0.95)',
+          borderColor: '#00d4ff',
+          borderWidth: 2,
+          textStyle: { color: '#fff', fontSize: 14 },
+          padding: [15, 20]
+        },
+        legend: {
+          data: ['普通球员', '最高产量/命中率球员'],
+          bottom: 10,
+          textStyle: { color: '#bcd3df', fontSize: 12 }
+        },
+        grid: {
+          left: '6%',
+          right: '6%',
+          bottom: '15%',
+          top: '18%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'value',
+          name: '三分命中数',
+          nameLocation: 'middle',
+          nameGap: 40,
+          nameTextStyle: { color: '#00d4ff', fontSize: 15, fontWeight: 600 },
+          min: 0,
+          max: Math.ceil(maxMade / madeInterval) * madeInterval + madeInterval,
+          interval: madeInterval,
+          splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.08)' } },
+          axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.3)' } },
+          axisLabel: { color: '#bcd3df', fontSize: 12 }
+        },
+        yAxis: {
+          type: 'value',
+          name: '三分命中率 (%)',
+          nameLocation: 'middle',
+          nameGap: 55,
+          nameTextStyle: { color: '#00d4ff', fontSize: 15, fontWeight: 600 },
+          min: 0,
+          max: Math.ceil(maxPct / pctInterval) * pctInterval + pctInterval,
+          interval: pctInterval,
+          splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.08)' } },
+          axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.3)' } },
+          axisLabel: { color: '#bcd3df', fontSize: 12, formatter: '{value}%' }
+        },
+        series: [
+          {
+            name: '普通球员',
+            type: 'scatter',
+            symbolSize: function(data) {
+              return Math.sqrt(data[0]) * 1.5 + 8;
+            },
+            data: normalData,
+            itemStyle: {
+              color: new echarts.graphic.RadialGradient(0.5, 0.5, 1, [
+                { offset: 0, color: '#00d4ff' },
+                { offset: 1, color: 'rgba(0, 212, 255, 0.3)' }
+              ]),
+              shadowBlur: 15,
+              shadowColor: 'rgba(0, 212, 255, 0.5)'
+            },
+            emphasis: {
+              itemStyle: {
+                color: '#00d4ff',
+                shadowBlur: 25,
+                shadowColor: 'rgba(0, 212, 255, 0.9)',
+                borderColor: '#fff',
+                borderWidth: 2
+              },
+              scale: 1.3
+            }
+          },
+          {
+            name: '最高产量/命中率球员',
+            type: 'effectScatter',
+            symbolSize: function(data) {
+              return Math.sqrt(data[0]) * 1.5 + 12;
+            },
+            data: rippleData,
+            rippleEffect: {
+              brushType: 'stroke',
+              scale: 5,
+              period: 3
+            },
+            itemStyle: {
+              color: new echarts.graphic.RadialGradient(0.5, 0.5, 1, [
+                { offset: 0, color: '#ff6b6b' },
+                { offset: 1, color: 'rgba(255, 107, 107, 0.3)' }
+              ]),
+              shadowBlur: 25,
+              shadowColor: 'rgba(255, 107, 107, 0.9)'
+            },
+            emphasis: {
+              itemStyle: {
+                color: '#ff6b6b',
+                shadowBlur: 35,
+                shadowColor: 'rgba(255, 107, 107, 1)',
+                borderColor: '#fff',
+                borderWidth: 3
+              },
+              scale: 1.4
+            }
+          }
+        ]
+      };
+
+      chart.setOption(option);
+      window.addEventListener('resize', () => chart.resize());
+    }
+
+    function initReboundAssistChart() {
+      const chart = echarts.init(document.getElementById('reboundAssistChart'));
+      
+      if (!nbaData.players || nbaData.players.length === 0) return;
+
+      const sorted = [...nbaData.players]
+        .sort((a, b) => ((b.rebound || b.Rebound || 0) + (b.assist || b.Assist || 0)) - 
+                        ((a.rebound || a.Rebound || 0) + (a.assist || a.Assist || 0)))
+        .slice(0, 15);
+
+      const names = sorted.map(p => p.playerName || p.PlayerName || '未知');
+      const rebounds = sorted.map(p => p.rebound || p.Rebound || 0);
+      const assists = sorted.map(p => p.assist || p.Assist || 0);
+
+      const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' },
+          backgroundColor: 'rgba(0, 20, 40, 0.95)',
+          borderColor: '#00d4ff',
+          borderWidth: 1,
+          textStyle: { color: '#fff' }
+        },
+        legend: {
+          data: ['篮板', '助攻'],
+          textStyle: { color: '#bcd3df' },
+          top: 10
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '15%',
+          top: '15%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'category',
+          data: names,
+          axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.3)' } },
+          axisLabel: { color: '#bcd3df', rotate: 30, fontSize: 10 }
+        },
+        yAxis: {
+          type: 'value',
+          axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.3)' } },
+          axisLabel: { color: '#bcd3df' },
+          splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }
+        },
+        series: [
+          {
+            name: '篮板',
+            type: 'bar',
+            data: rebounds,
+            itemStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: '#4ade80' },
+                { offset: 1, color: '#22c55e' }
+              ]),
+              borderRadius: [4, 4, 0, 0]
+            }
+          },
+          {
+            name: '助攻',
+            type: 'bar',
+            data: assists,
+            itemStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: '#fbbf24' },
+                { offset: 1, color: '#f59e0b' }
+              ]),
+              borderRadius: [4, 4, 0, 0]
+            }
+          }
+        ]
+      };
+
+      chart.setOption(option);
+      window.addEventListener('resize', () => chart.resize());
+    }
+
+    function initTeamRadarChart() {
+      const chart = echarts.init(document.getElementById('teamRadarChart'));
+      
+      if (!nbaData.teams || nbaData.teams.length === 0) return;
+
+      const top5 = [...nbaData.teams]
+        .sort((a, b) => {
+          const winA = parseFloat((a.winper || a.Winper || '0%').replace('%', ''));
+          const winB = parseFloat((b.winper || b.Winper || '0%').replace('%', ''));
+          return winB - winA;
+        })
+        .slice(0, 5);
+
+      const seriesData = top5.map(t => ({
+        name: (t.team || t.Team || '未知').split(' ').pop(),
+        value: [
+          t.Score || t.score || 0,
+          t.Rebound || t.rebound || 0,
+          t.Assist || t.assist || 0,
+          t.Steal || t.steal || 0,
+          t.Block || t.block || 0
+        ]
+      }));
+
+      const option = {
+        backgroundColor: 'transparent',
+        title: {
+          text: '球队综合能力对比',
+          left: 'center',
+          top: 10,
+          textStyle: { color: '#fff', fontSize: 16, fontWeight: 600 }
+        },
+        tooltip: {
+          trigger: 'item',
+          backgroundColor: 'rgba(0, 20, 40, 0.95)',
+          borderColor: '#00d4ff',
+          borderWidth: 1,
+          textStyle: { color: '#fff' }
+        },
+        legend: {
+          data: seriesData.map(d => d.name),
+          bottom: 10,
+          textStyle: { color: '#bcd3df', fontSize: 11 }
+        },
+        radar: {
+          indicator: [
+            { name: '得分', max: 130 },
+            { name: '篮板', max: 55 },
+            { name: '助攻', max: 30 },
+            { name: '抢断', max: 12 },
+            { name: '盖帽', max: 8 }
+          ],
+          shape: 'polygon',
+          splitNumber: 5,
+          name: {
+            textStyle: { color: '#00d4ff', fontSize: 12, fontWeight: 600 }
+          },
+          splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } },
+          splitArea: {
+            show: true,
+            areaStyle: { color: ['rgba(0, 212, 255, 0.05)', 'rgba(0, 212, 255, 0.1)'] }
+          },
+          axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } }
+        },
+        series: [{
+          type: 'radar',
+          data: seriesData.map((d, i) => ({
+            name: d.name,
+            value: d.value,
+            symbol: 'circle',
+            symbolSize: 6,
+            lineStyle: { width: 2 },
+            areaStyle: { opacity: 0.3 }
+          })),
+          color: ['#00d4ff', '#ff6b6b', '#4ade80', '#fbbf24', '#a78bfa']
+        }]
+      };
+
+      chart.setOption(option);
+      window.addEventListener('resize', () => chart.resize());
+    }
+
+    loadData();
+  </script>
+  <script src="./js/gsap-animations.js"></script>
+</body>
+</html>

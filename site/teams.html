@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NBA 球队 · StatCourt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0a1929 0%, #1a2027 50%, #0d1b2a 100%);
+      color: #eaf6fb;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(10, 25, 41, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-inner {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #00d4ff;
+      letter-spacing: -0.5px;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      color: #bcd3df;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: #00d4ff;
+    }
+
+    .teams-main {
+      display: flex;
+      min-height: 100vh;
+      padding-top: 70px;
+    }
+
+    .teams-left {
+      width: 320px;
+      min-width: 320px;
+      background: rgba(10, 25, 41, 0.6);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      overflow-y: auto;
+      height: calc(100vh - 70px);
+      position: sticky;
+      top: 70px;
+    }
+
+    .teams-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .teams-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+
+    .conference-tabs {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #bcd3df;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-radius: 0.5rem;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(90deg, #00d4ff, #3bc9ff);
+      color: #023046;
+      border-color: transparent;
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: rgba(0, 212, 255, 0.1);
+      border-color: rgba(0, 212, 255, 0.3);
+    }
+
+    .teams-list {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .team-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .team-item:hover {
+      background: rgba(0, 212, 255, 0.1);
+      border-color: rgba(0, 212, 255, 0.3);
+      transform: translateX(5px);
+    }
+
+    .team-item.active {
+      background: rgba(0, 212, 255, 0.15);
+      border-color: rgba(0, 212, 255, 0.5);
+    }
+
+    .team-logo {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      border-radius: 0.5rem;
+    }
+
+    .team-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .teams-right {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+      height: calc(100vh - 70px);
+    }
+
+    .team-detail-container {
+      display: none;
+    }
+
+    .team-detail-container.visible {
+      display: block;
+    }
+
+    .team-header-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border-radius: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .team-banner {
+      width: 200px;
+      height: 200px;
+      object-fit: contain;
+    }
+
+    .team-info {
+      flex: 1;
+    }
+
+    .team-title-name {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .team-meta {
+      font-size: 1rem;
+      color: #9bd1e3;
+      margin-bottom: 1.5rem;
+    }
+
+    .team-stats-row {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .team-stat-box {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 1rem;
+      padding: 1rem 1.5rem;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .team-stat-label {
+      font-size: 0.85rem;
+      color: #9bd1e3;
+      margin-bottom: 0.25rem;
+    }
+
+    .team-stat-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    .team-stat-value.win { color: #4ade80; }
+    .team-stat-value.lose { color: #f87171; }
+    .team-stat-value.winper { color: #fbbf24; }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(180deg, #00d4ff, #3bc9ff);
+      border-radius: 2px;
+    }
+
+    .players-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .player-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .player-card:hover {
+      background: rgba(0, 212, 255, 0.1);
+      border-color: rgba(0, 212, 255, 0.3);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+    }
+
+    .player-card.active {
+      background: rgba(0, 212, 255, 0.15);
+      border-color: rgba(0, 212, 255, 0.5);
+    }
+
+    .player-avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(0, 212, 255, 0.3);
+    }
+
+    .player-info {
+      flex: 1;
+    }
+
+    .player-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.25rem;
+    }
+
+    .player-stats-mini {
+      font-size: 0.85rem;
+      color: #9bd1e3;
+    }
+
+    .player-stats-mini span {
+      color: #00d4ff;
+      font-weight: 600;
+    }
+
+    .player-detail-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border-radius: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2rem;
+      margin-top: 2rem;
+      display: none;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .player-detail-card.visible {
+      display: block;
+    }
+
+    .player-detail-header {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      align-items: center;
+    }
+
+    .player-detail-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #00d4ff;
+      box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+    }
+
+    .player-detail-info {
+      flex: 1;
+    }
+
+    .player-detail-name {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .player-detail-meta {
+      font-size: 1rem;
+      color: #9bd1e3;
+      margin-bottom: 1rem;
+    }
+
+    .player-detail-stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1rem;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 0.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-item-label {
+      font-size: 0.8rem;
+      color: #9bd1e3;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-item-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #00d4ff;
+    }
+
+    .radar-chart-container {
+      width: 100%;
+      height: 400px;
+      margin-top: 2rem;
+    }
+
+    .placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 400px;
+      color: #9bd1e3;
+      font-size: 1.25rem;
+    }
+
+    .footer {
+      background: rgba(10, 25, 41, 0.8);
+      backdrop-filter: blur(20px);
+      padding: 2rem 0;
+      text-align: center;
+      color: #9bd1e3;
+      font-size: 0.875rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    @media (max-width: 1024px) {
+      .teams-main {
+        flex-direction: column;
+      }
+
+      .teams-left {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        top: 0;
+      }
+
+      .teams-right {
+        height: auto;
+      }
+
+      .team-header-card {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .player-detail-stats {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .team-title-name {
+        font-size: 2rem;
+      }
+
+      .players-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .player-detail-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="./index.html" class="brand">StatCourt</a>
+      <ul class="nav-links">
+        <li><a href="./index.html">首页</a></li>
+        <li><a href="./data.html">数据</a></li>
+        <li><a href="./teams.html" class="active">球队</a></li>
+        <li><a href="./visualization.html">可视化</a></li>
+        <li><a href="./chat.html">AI助手</a></li>
+        <li><a href="./advanced.html">高阶数据</a></li>
+        <li><a href="./compare.html">对比</a></li>
+        <li><a href="./demo.html">3D展示</a></li>
+        <li><a href="./demo-advanced.html">3D高阶</a></li>
+        <li><a href="./map.html">球队地图</a></li>
+        <li><a href="./match.html">比赛模拟</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="teams-main">
+    <aside class="teams-left">
+      <header class="teams-header">
+        <h1 class="teams-title">NBA 球队</h1>
+        <div class="conference-tabs">
+          <button class="tab-btn active" data-conference="east">东部</button>
+          <button class="tab-btn" data-conference="west">西部</button>
+        </div>
+      </header>
+      <div class="teams-list" id="teamsList"></div>
+    </aside>
+
+    <section class="teams-right">
+      <div class="team-detail-container" id="teamDetailContainer">
+        <div class="team-header-card">
+          <img id="teamBanner" src="" alt="" class="team-banner">
+          <div class="team-info">
+            <h2 class="team-title-name" id="teamTitleName">—</h2>
+            <p class="team-meta" id="teamMeta">—</p>
+            <div class="team-stats-row" id="teamStatsRow"></div>
+            <div class="team-history-section" id="teamHistorySection" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+              <h4 style="font-size: 1rem; font-weight: 700; color: #00d4ff; margin-bottom: 0.75rem;">球队历史</h4>
+              <p id="teamHistory" style="font-size: 0.9rem; color: #bcd3df; line-height: 1.8;">—</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="section-title">球队球员</h3>
+        <div class="players-grid" id="playersGrid"></div>
+
+        <div class="player-detail-card" id="playerDetailCard">
+          <div class="player-detail-header">
+            <img id="playerDetailAvatar" src="" alt="" class="player-detail-avatar">
+            <div class="player-detail-info">
+              <h3 class="player-detail-name" id="playerDetailName">—</h3>
+              <p class="player-detail-meta" id="playerDetailMeta">—</p>
+              <div class="player-detail-stats" id="playerDetailStats"></div>
+            </div>
+          </div>
+          <div id="radarChart" class="radar-chart-container"></div>
+        </div>
+      </div>
+
+      <div class="placeholder" id="placeholder">
+        <p>👈 点击左侧球队查看详情</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Copyright ©2026 All rights reserved | StatCourt · NBA数据球场</p>
+    </div>
+  </footer>
+
+  <script>
+    const API_BASE_URL = 'http://localhost:8081';
+    const TEAM_BANNER_BASE = './assets/全新NBA球队logo/';
+
+    let teamsData = [];
+    let playersData = [];
+    let currentTeam = null;
+    let radarChart = null;
+
+    const TEAM_BANNER_MAP = {
+      '雷霆': '雷霆.PNG', '掘金': '掘金.PNG', '热火': '热火.PNG', '森林狼': '森林狼.PNG',
+      '骑士': '骑士.PNG', '尼克斯': '尼克斯.PNG', '雄鹿': '雄鹿.PNG', '76人': '76人.PNG',
+      '步行者': '步行者.PNG', '魔术': '魔术.PNG', '凯尔特人': '凯尔特人.PNG', '老鹰': '老鹰.PNG',
+      '公牛': '公牛.PNG', '猛龙': '猛龙.PNG', '篮网': '篮网.PNG', '黄蜂': '黄蜂.PNG',
+      '奇才': '奇才.PNG', '活塞': '活塞.PNG', '湖人': '湖人.PNG', '快船': '快船.PNG',
+      '太阳': '太阳.PNG', '国王': '国王.PNG', '独行侠': '独行侠.PNG', '火箭': '火箭.PNG',
+      '鹈鹕': '鹈鹕.PNG', '爵士': '爵士.PNG', '勇士': '勇士.PNG', '灰熊': '灰熊.PNG',
+      '马刺': '马刺.PNG', '开拓者': '开拓者.PNG'
+    };
+
+    const TEAM_CONFERENCE = {
+      '雷霆': 'west', '掘金': 'west', '热火': 'east', '森林狼': 'west', '骑士': 'east',
+      '尼克斯': 'east', '雄鹿': 'east', '76人': 'east', '步行者': 'east', '魔术': 'east',
+      '凯尔特人': 'east', '老鹰': 'east', '公牛': 'east', '猛龙': 'east', '篮网': 'east',
+      '黄蜂': 'east', '奇才': 'east', '活塞': 'east', '湖人': 'west', '快船': 'west',
+      '太阳': 'west', '国王': 'west', '独行侠': 'west', '火箭': 'west', '鹈鹕': 'west',
+      '爵士': 'west', '勇士': 'west', '灰熊': 'west', '马刺': 'west', '开拓者': 'west'
+    };
+
+    const TEAM_HISTORY = {
+      '雷霆': '前身 1967 年 ABA 联盟的西雅图超音速队，1976 年加入 NBA，2008 年迁至俄克拉荷马城更名雷霆，官方认定其承接超音速队史。1979 年超音速时期夺得队史唯一总冠军，2012 年杜兰特 + 威斯布鲁克 + 哈登三少带队闯入总决赛，以超强选秀培养能力闻名。',
+      '掘金': '前身 1967 年 ABA 联盟的丹佛火箭队，1974 年更名掘金，1976 年随 ABA-NBA 合并加入联盟。2023 年尼古拉・约基奇带队夺得队史首冠，终结了队史无冠的历史，是西部老牌劲旅。',
+      '热火': '1988 年联盟扩军成立，队史 3 次总冠军：2006 年德怀恩・韦德 + 沙奎尔・奥尼尔带队夺冠，2012、2013 年詹姆斯 / 韦德 / 波什三巨头两连冠。队史 6 次闯入总决赛，以极致韧性和纪律性的球队文化著称。',
+      '森林狼': '1989 年联盟扩军成立，至今未获总冠军，队史两次闯入西决：2004 年凯文・加内特带队、2024 年安东尼・爱德华兹带队，加内特时期缔造了队史第一个巅峰。',
+      '骑士': '1970 年联盟扩军成立，队史核心巅峰由勒布朗・詹姆斯缔造。2016 年詹姆斯带队完成总决赛 1-3 史诗级逆转，击败勇士夺得队史首冠，终结了克利夫兰体育界 52 年四大联盟无冠的历史。',
+      '尼克斯': '1946 年 BAA 创始球队，与凯尔特人同为联盟从未搬迁更名的球队，主场麦迪逊广场花园被誉为 “篮球麦加”。队史 2 次总冠军（1970、1973），由威利斯・里德、沃尔特・弗雷泽带队；90 年代尤因带队两进总决赛，2024 年时隔 21 年重返总决赛舞台。',
+      '雄鹿': '1968 年联盟扩军成立，建队仅 3 年便在 1971 年由贾巴尔 + 奥斯卡・罗伯特森带队夺得队史首冠，2021 年扬尼斯・阿德托昆博带队再夺总冠军，是联盟历史上夺冠速度最快的球队之一。',
+      '76人': '前身 1946 年成立的锡拉丘兹民族队，1963 年迁至费城更名 76 人（纪念 1776 年《独立宣言》在费城签署）。队史 3 次总冠军：1955 年民族队时期、1967 年张伯伦带队、1983 年 J 博士 + 摩西・马龙带队；2001 年艾弗森单核带队闯入总决赛，是东部传统豪门。',
+      '步行者': '前身 1967 年 ABA 联盟印第安纳步行者队，ABA 时期 3 次夺得总冠军，1976 年随 ABA-NBA 合并加入联盟。NBA 时期至今未夺冠，2000 年雷吉・米勒带队闯入总决赛，以强硬球风和关键球文化著称。',
+      '魔术': '1989 年联盟扩军成立，至今未获总冠军，两次闯入总决赛：1995 年沙奎尔・奥尼尔 + 安芬尼・哈达威带队，2009 年德怀特・霍华德带队，是联盟天赋型球队的代表。',
+      '凯尔特人': '1946 年 BAA（NBA 前身）创始球队，联盟唯二从未搬迁、未更名的球队。队史 17 次总冠军，与湖人并列联盟第一；核心巅峰包括 60 年代比尔・拉塞尔带队 8 连冠、80 年代拉里・伯德三巨头时代、2008 年加内特 / 皮尔斯 / 雷・阿伦三巨头夺冠、2024 年再夺总冠军，是 NBA 历史底蕴最深厚的球队。',
+      '老鹰': '前身 1946 年成立的三城黑鹰队，历经多次搬迁更名，1968 年迁至亚特兰大，1949 年加入 BAA。1958 年圣路易斯老鹰时期，鲍勃・佩蒂特带队夺得队史唯一总冠军，标志性球星包括多米尼克・威尔金斯、特雷・杨。',
+      '公牛': '1966 年联盟扩军成立，90 年代在迈克尔・乔丹、斯科蒂・皮蓬与菲尔・杰克逊的带领下，完成两次三连冠（1991-1993、1996-1998），6 次闯入总决赛全部夺冠，是 NBA 历史上总决赛胜率 100% 的球队，乔丹时代让公牛成为全球顶级体育 IP。',
+      '猛龙': '1995 年联盟扩军成立，是 NBA 唯一一支非美国本土球队。2019 年科怀・伦纳德带队夺得队史首冠，也是 NBA 首支非美国本土球队夺冠；标志性球星包括文斯・卡特、克里斯・波什、凯尔・洛瑞。',
+      '篮网': '前身 1967 年 ABA 联盟的新泽西美国人队，历经多次更名搬迁，1976 年随 ABA-NBA 合并加入联盟，2012 年迁至布鲁克林。ABA 时期 2 次总冠军（1974、1976，J 博士带队），NBA 时期 2002、2003 年连续闯入总决赛，至今未获 NBA 总冠军。',
+      '黄蜂': '2004 年以夏洛特山猫之名成立，2014 年更名夏洛特黄蜂，承接了 1988-2002 年原夏洛特黄蜂的队史与纪录。队史至今未闯入总决赛、无总冠军，迈克尔・乔丹曾长期担任球队老板。',
+      '奇才': '前身 1961 年成立的芝加哥包装工队，历经多次搬迁更名，1973-1997 年名为华盛顿子弹队，1997 年正式更名奇才。1978 年子弹队时期夺得队史唯一总冠军，标志性球星包括韦斯・昂塞尔德、吉尔伯特・阿里纳斯。',
+      '活塞': '前身 1941 年成立的韦恩堡活塞队，1948 年加入 BAA，1957 年迁至底特律。队史 3 次总冠军：1989、1990 年 “坏孩子军团”（以赛亚・托马斯带队）两连冠，2004 年 “平民五虎” 击败湖人 F4 夺冠，以铁血防守闻名联盟。',
+      '湖人': '前身 1947 年成立的明尼阿波利斯湖人队，1948 年加入 BAA，1960 年迁至洛杉矶。队史 17 次总冠军，与凯尔特人并列联盟第一，缔造了麦肯时代、Showtime 时代、OK 组合三连冠、科比两连冠、詹姆斯 + 戴维斯夺冠等多个王朝，是全球影响力最大的 NBA 球队。',
+      '快船': '前身 1945 年成立的罗切斯特皇家队，1948 年加入 BAA，是联盟历史最悠久的球队之一，历经多次搬迁更名，1985 年迁至萨克拉门托。1951 年罗切斯特皇家时期夺得队史唯一总冠军，2000 年初克里斯・韦伯带队的普林斯顿体系成为联盟经典。',
+      '太阳': '1968 年联盟扩军成立，至今未获总冠军，3 次闯入总决赛：1976 年、1993 年查尔斯・巴克利带队、2021 年保罗 + 布克带队，是西部传统劲旅，标志性球星包括史蒂夫・纳什、阿玛雷・斯塔德迈尔。',
+      '国王': '前身 1945 年成立的罗切斯特皇家队，1948 年加入 BAA，是联盟历史最悠久的球队之一，历经多次搬迁更名，1985 年迁至萨克拉门托。1951 年罗切斯特皇家时期夺得队史唯一总冠军，2000 年初克里斯・韦伯带队的普林斯顿体系成为联盟经典。',
+      '独行侠': '1980 年联盟扩军成立，曾用中文名 “小牛”，2018 年正式更名为独行侠。队史 1 次总冠军，2011 年德克・诺维茨基带队击败热火三巨头夺冠，成为 NBA 最经典的单核夺冠案例，标志性球星还包括卢卡・东契奇。',
+      '火箭': '1967 年联盟扩军成立于圣地亚哥，1971 年迁至休斯顿。队史 2 次总冠军，1994、1995 年哈基姆・奥拉朱旺带队完成两连冠，1995 年以西部第六身份夺冠，是 NBA 历史排名最低的总冠军球队；姚明、麦迪的 “姚麦组合” 让其在中国拥有极高人气。',
+      '鹈鹕': '前身 2002 年迁至新奥尔良的黄蜂队，2013 年正式更名鹈鹕；NBA 官方认定其队史从 2002 年算起，原夏洛特黄蜂队史归属现夏洛特黄蜂。队史至今未闯入总决赛、无总冠军，标志性球星包括克里斯・保罗、安东尼・戴维斯、锡安・威廉姆森。',
+      '爵士': '前身 1974 年成立的新奥尔良爵士队，1979 年迁至盐湖城。队史至今未获总冠军，1997、1998 年斯托克顿 + 卡尔・马龙带队连续两年闯入总决赛，均不敌乔丹的公牛，以极致团队篮球和铁血纪律著称。',
+      '勇士': '前身 1946 年成立的费城勇士队，BAA 创始球队，1962 年迁至旧金山，1971 年更名金州勇士。队史 7 次总冠军，2015-2022 年斯蒂芬・库里带队缔造小球王朝，曾创下 73 胜 9 负的常规赛历史最佳战绩，是小球时代的开创者。',
+      '灰熊': '前身 1995 年联盟扩军成立的温哥华灰熊队，2001 年迁至孟菲斯。队史至今未闯入总决赛、无总冠军；2010 年兰多夫 + 小加索尔的 “黑白双熊”，以 “坚韧与磨砺” 的铁血防守体系闻名联盟，2022 年闯入西决。',
+      '马刺': '前身 1967 年 ABA 联盟的达拉斯丛林队，1973 年迁至圣安东尼奥更名马刺，1976 年加入 NBA。队史 5 次总冠军（1999、2003、2005、2007、2014），波波维奇与邓肯、帕克、吉诺比利的 GDP 组合缔造了 20 年长盛不衰的王朝，是联盟历史常规赛胜率最高的球队之一。',
+      '开拓者': '1970 年联盟扩军成立，1977 年比尔・沃顿带队夺得队史唯一总冠军。队史 3 次闯入总决赛，曾创下 1983-2003 年连续 21 年闯入季后赛的联盟第二长纪录，标志性球星包括克莱德・德雷克斯勒、达米安・利拉德。'
+    };
+
+    async function loadData() {
+      try {
+        const response = await axios({
+          method: 'GET',
+          url: `${API_BASE_URL}/api/data`,
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const res = response.data;
+        if (res && (res.code === 200 || res.code === 0)) {
+          teamsData = res.data.teams || [];
+          playersData = res.data.players || [];
+          renderTeams('east');
+        }
+      } catch (error) {
+        console.error('加载数据失败:', error);
+      }
+    }
+
+    function getTeamShortName(teamName) {
+      if (!teamName) return '';
+      const parts = teamName.split(' ');
+      return parts.length > 1 ? parts[parts.length - 1] : teamName;
+    }
+
+    function renderTeams(conference) {
+      const listEl = document.getElementById('teamsList');
+      listEl.innerHTML = '';
+
+      const filteredTeams = teamsData.filter(team => {
+        const shortName = getTeamShortName(team.team || team.Team);
+        return TEAM_CONFERENCE[shortName] === conference;
+      });
+
+      filteredTeams.forEach((team) => {
+        const shortName = getTeamShortName(team.team || team.Team);
+        const teamItem = document.createElement('div');
+        teamItem.className = 'team-item';
+        teamItem.innerHTML = `
+          <img src="${team.teamimage || team.Teamimage || team.TeamImage || ''}" alt="${team.team || team.Team || ''}" class="team-logo">
+          <span class="team-name">${team.team || team.Team || '未知'}</span>
+        `;
+
+        teamItem.addEventListener('click', () => {
+          document.querySelectorAll('.team-item').forEach(item => item.classList.remove('active'));
+          teamItem.classList.add('active');
+          showTeamDetail(team);
+        });
+
+        listEl.appendChild(teamItem);
+      });
+    }
+
+    function showTeamDetail(team) {
+      currentTeam = team;
+      const shortName = getTeamShortName(team.team || team.Team);
+
+      document.getElementById('teamBanner').src = TEAM_BANNER_BASE + (TEAM_BANNER_MAP[shortName] || '');
+      document.getElementById('teamTitleName').textContent = team.team || team.Team || '未知';
+      document.getElementById('teamMeta').textContent = `排名 #${team.teamrank || team.Teamrank || '-'} | 场次 ${team.NumberOfMatches || team.numberOfMatches || '-'}`;
+
+      document.getElementById('teamStatsRow').innerHTML = `
+        <div class="team-stat-box">
+          <div class="team-stat-label">胜场</div>
+          <div class="team-stat-value win">${team.win || team.Win || 0}</div>
+        </div>
+        <div class="team-stat-box">
+          <div class="team-stat-label">负场</div>
+          <div class="team-stat-value lose">${team.lose || team.Lose || 0}</div>
+        </div>
+        <div class="team-stat-box">
+          <div class="team-stat-label">胜率</div>
+          <div class="team-stat-value winper">${team.winper || team.Winper || '0%'}</div>
+        </div>
+      `;
+
+      const history = TEAM_HISTORY[shortName] || '暂无球队历史信息。';
+      document.getElementById('teamHistory').textContent = history;
+
+      const teamPlayers = playersData.filter(p => (p.team || p.Team) === shortName);
+      renderPlayers(teamPlayers);
+
+      document.getElementById('teamDetailContainer').classList.add('visible');
+      document.getElementById('placeholder').style.display = 'none';
+      document.getElementById('playerDetailCard').classList.remove('visible');
+    }
+
+    function renderPlayers(players) {
+      const grid = document.getElementById('playersGrid');
+      grid.innerHTML = '';
+
+      if (players.length === 0) {
+        grid.innerHTML = '<p style="color: #9bd1e3; text-align: center; width: 100%;">暂无球员数据</p>';
+        return;
+      }
+
+      players.forEach(player => {
+        const card = document.createElement('div');
+        card.className = 'player-card';
+        card.innerHTML = `
+          <img src="${player.playerImage || player.PlayerImage || ''}" alt="${player.playerName || player.PlayerName || ''}" class="player-avatar">
+          <div class="player-info">
+            <div class="player-name">${player.playerName || player.PlayerName || '未知'}</div>
+            <div class="player-stats-mini">
+              得分 <span>${player.score || player.Score || 0}</span> | 
+              篮板 <span>${player.rebound || player.Rebound || 0}</span> | 
+              助攻 <span>${player.assist || player.Assist || 0}</span>
+            </div>
+          </div>
+        `;
+
+        card.addEventListener('click', () => {
+          document.querySelectorAll('.player-card').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          showPlayerDetail(player);
+        });
+
+        grid.appendChild(card);
+      });
+    }
+
+    function showPlayerDetail(player) {
+      const detailCard = document.getElementById('playerDetailCard');
+      
+      document.getElementById('playerDetailAvatar').src = player.playerImage || player.PlayerImage || '';
+      document.getElementById('playerDetailName').textContent = player.playerName || player.PlayerName || '未知';
+      document.getElementById('playerDetailMeta').textContent = `${player.team || player.Team || '未知'} | 排名 #${player.playerRank || player.PlayerRank || '-'}`;
+
+      document.getElementById('playerDetailStats').innerHTML = `
+        <div class="stat-item">
+          <div class="stat-item-label">得分</div>
+          <div class="stat-item-value">${player.score || player.Score || 0}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item-label">篮板</div>
+          <div class="stat-item-value">${player.rebound || player.Rebound || 0}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item-label">助攻</div>
+          <div class="stat-item-value">${player.assist || player.Assist || 0}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item-label">抢断</div>
+          <div class="stat-item-value">${player.steal || player.Steal || 0}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item-label">盖帽</div>
+          <div class="stat-item-value">${player.block || player.Block || 0}</div>
+        </div>
+      `;
+
+      detailCard.classList.add('visible');
+
+      setTimeout(() => {
+        renderRadarChart(player);
+      }, 100);
+    }
+
+    function renderRadarChart(player) {
+      const chartDom = document.getElementById('radarChart');
+      if (radarChart) {
+        radarChart.dispose();
+      }
+      radarChart = echarts.init(chartDom);
+
+      const score = player.score || player.Score || 0;
+      const rebound = player.rebound || player.Rebound || 0;
+      const assist = player.assist || player.Assist || 0;
+      const steal = player.steal || player.Steal || 0;
+      const block = player.block || player.Block || 0;
+
+      const option = {
+        backgroundColor: 'transparent',
+        title: {
+          text: '球员能力雷达图',
+          left: 'center',
+          top: 10,
+          textStyle: {
+            color: '#fff',
+            fontSize: 18,
+            fontWeight: 600
+          }
+        },
+        tooltip: {
+          trigger: 'item',
+          backgroundColor: 'rgba(0, 20, 40, 0.95)',
+          borderColor: '#00d4ff',
+          borderWidth: 1,
+          textStyle: {
+            color: '#fff'
+          }
+        },
+        radar: {
+          indicator: [
+            { name: '得分', max: 40 },
+            { name: '篮板', max: 15 },
+            { name: '助攻', max: 15 },
+            { name: '抢断', max: 3 },
+            { name: '盖帽', max: 3 }
+          ],
+          shape: 'polygon',
+          splitNumber: 5,
+          name: {
+            textStyle: {
+              color: '#00d4ff',
+              fontSize: 14,
+              fontWeight: 600
+            }
+          },
+          splitLine: {
+            lineStyle: {
+              color: 'rgba(255, 255, 255, 0.1)'
+            }
+          },
+          splitArea: {
+            show: true,
+            areaStyle: {
+              color: ['rgba(0, 212, 255, 0.05)', 'rgba(0, 212, 255, 0.1)']
+            }
+          },
+          axisLine: {
+            lineStyle: {
+              color: 'rgba(255, 255, 255, 0.2)'
+            }
+          }
+        },
+        series: [{
+          type: 'radar',
+          data: [{
+            value: [score, rebound, assist, steal, block],
+            name: player.playerName || player.PlayerName || '球员',
+            symbol: 'circle',
+            symbolSize: 8,
+            lineStyle: {
+              color: '#00d4ff',
+              width: 3
+            },
+            areaStyle: {
+              color: new echarts.graphic.RadialGradient(0.5, 0.5, 1, [
+                { offset: 0, color: 'rgba(0, 212, 255, 0.8)' },
+                { offset: 1, color: 'rgba(0, 212, 255, 0.2)' }
+              ])
+            },
+            itemStyle: {
+              color: '#00d4ff',
+              borderColor: '#fff',
+              borderWidth: 2
+            }
+          }]
+        }]
+      };
+
+      radarChart.setOption(option);
+      window.addEventListener('resize', () => radarChart.resize());
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const conference = this.dataset.conference;
+        renderTeams(conference);
+        document.getElementById('teamDetailContainer').classList.remove('visible');
+        document.getElementById('placeholder').style.display = 'flex';
+      });
+    });
+
+    loadData();
+  </script>
+  <script src="./js/gsap-animations.js"></script>
+</body>
+</html>

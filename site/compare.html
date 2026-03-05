@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>球员对比 · StatCourt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0a0f1a;
+      --bg-secondary: rgba(15, 25, 40, 0.6);
+      --bg-card: rgba(20, 35, 55, 0.4);
+      --bg-hover: rgba(30, 50, 80, 0.5);
+      --accent: #06b6d4;
+      --accent-light: #22d3ee;
+      --accent-glow: rgba(6, 182, 212, 0.3);
+      --accent2: #3b82f6;
+      --accent2-light: #60a5fa;
+      --text-primary: #f0f9ff;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: rgba(148, 163, 184, 0.1);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      animation: float 20s ease-in-out infinite;
+    }
+
+    .bg-orb:nth-child(1) {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.4) 0%, transparent 70%);
+      top: -200px;
+      left: -100px;
+    }
+
+    .bg-orb:nth-child(2) {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+      top: 50%;
+      right: -150px;
+      animation-delay: -5s;
+    }
+
+    .bg-orb:nth-child(3) {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(34, 211, 238, 0.3) 0%, transparent 70%);
+      bottom: -100px;
+      left: 30%;
+      animation-delay: -10s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(50px, -50px) scale(1.1); }
+      50% { transform: translate(-30px, 30px) scale(0.95); }
+      75% { transform: translate(-50px, -30px) scale(1.05); }
+    }
+
+    .bg-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(148, 163, 184, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridMove 30s linear infinite;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(60px, 60px); }
+    }
+
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(10, 15, 26, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+      transition: all 0.3s ease;
+    }
+
+    .brand:hover {
+      text-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .brand span {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 32px;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--text-primary);
+    }
+
+    .nav-links a:hover::after,
+    .nav-links a.active::after {
+      width: 100%;
+    }
+
+    .main {
+      padding: 96px 24px 48px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 32px;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .selector-container {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 24px;
+      align-items: start;
+      margin-bottom: 32px;
+      animation: fadeInUp 0.6s ease-out 0.15s both;
+    }
+
+    .selector-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .selector-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .selector-card.cyan {
+      border-color: rgba(6, 182, 212, 0.3);
+    }
+
+    .selector-card.blue {
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .selector-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .selector-card.cyan .selector-label { color: var(--accent-light); }
+    .selector-card.blue .selector-label { color: var(--accent2-light); }
+
+    .player-select {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+
+    .player-select:hover {
+      border-color: rgba(148, 163, 184, 0.2);
+    }
+
+    .player-select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .player-select option {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 8px;
+    }
+
+    .vs-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      border-radius: 50%;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: white;
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.5);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(6, 182, 212, 0.5); }
+      50% { transform: scale(1.1); box-shadow: 0 6px 30px rgba(6, 182, 212, 0.7); }
+    }
+
+    .selected-player {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+    }
+
+    .player-avatar-large {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .player-avatar-large img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .player-details h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .player-details .english-name {
+      font-size: 0.8rem;
+      color: var(--accent-light);
+      margin-bottom: 2px;
+    }
+
+    .player-details p {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 32px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title .icon {
+      font-size: 1.2rem;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 24px;
+      animation: fadeInUp 0.6s ease-out 0.2s both;
+    }
+
+    .chart-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .chart-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .chart-card.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .chart-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chart-title svg {
+      width: 18px;
+      height: 18px;
+      color: var(--accent-light);
+    }
+
+    .chart-container {
+      height: 300px;
+    }
+
+    .chart-container.large {
+      height: 400px;
+    }
+
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .stat-item .label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .stat-item .values {
+      display: flex;
+      gap: 16px;
+    }
+
+    .stat-item .value-cyan {
+      color: var(--accent-light);
+      font-weight: 600;
+    }
+
+    .stat-item .value-blue{
+      color: var(--accent2-light);
+      font-weight: 600;
+    }
+
+    .winner {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .winner .value-cyan,
+    .winner .value-blue {
+      color: var(--success);
+    }
+
+    .advanced-explanation {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+    }
+
+    .advanced-explanation h4 {
+      font-size: 0.9rem;
+      color: var(--accent-light);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .explanation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .explanation-item {
+      background: var(--bg-card);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .explanation-item .metric-name {
+      font-weight: 600;
+      color: var(--accent-light);
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    .explanation-item .metric-desc {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .ai-analysis-section {
+      margin-top: 32px;
+      animation: fadeInUp 0.6s ease-out 0.3s both;
+    }
+
+    .ai-analysis-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .ai-analysis-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
+    }
+
+    .ai-analysis-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .ai-analysis-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .ai-response-card {
+      margin-top: 24px;
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .ai-response-card.show {
+      display: block;
+      animation: fadeInUp 0.4s ease-out;
+    }
+
+    .ai-response-header {
+      padding: 16px 20px;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ai-response-header .ai-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .ai-response-header h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .ai-response-header p {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .ai-response-content {
+      padding: 24px;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .ai-response-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .ai-response-content::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+      border-radius: 3px;
+    }
+
+    .ai-response-content::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 3px;
+    }
+
+    .ai-loading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-secondary);
+      padding: 20px;
+    }
+
+    .ai-loading .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .markdown-content {
+      color: var(--text-primary);
+      line-height: 1.8;
+    }
+
+    .markdown-content h1,
+    .markdown-content h2,
+    .markdown-content h3,
+    .markdown-content h4 {
+      color: var(--accent-light);
+      margin-top: 24px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .markdown-content h1 { font-size: 1.5rem; }
+    .markdown-content h2 { font-size: 1.3rem; }
+    .markdown-content h3 { font-size: 1.1rem; }
+    .markdown-content h4 { font-size: 1rem; }
+
+    .markdown-content p {
+      margin-bottom: 12px;
+    }
+
+    .markdown-content ul,
+    .markdown-content ol {
+      margin: 12px 0;
+      padding-left: 24px;
+    }
+
+    .markdown-content li {
+      margin-bottom: 8px;
+    }
+
+    .markdown-content strong {
+      color: var(--accent-light);
+      font-weight: 600;
+    }
+
+    .markdown-content em {
+      color: var(--accent2-light);
+      font-style: italic;
+    }
+
+    .markdown-content code {
+      background: var(--bg-secondary);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9em;
+      color: var(--accent-light);
+    }
+
+    .markdown-content pre {
+      background: var(--bg-secondary);
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 16px 0;
+      border: 1px solid var(--border);
+    }
+
+    .markdown-content pre code {
+      background: none;
+      padding: 0;
+      color: var(--text-primary);
+    }
+
+    .markdown-content blockquote {
+      border-left: 4px solid var(--accent);
+      padding-left: 16px;
+      margin: 16px 0;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .markdown-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+
+    .markdown-content th,
+    .markdown-content td {
+      padding: 12px;
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .markdown-content th {
+      background: var(--bg-secondary);
+      color: var(--accent-light);
+      font-weight: 600;
+    }
+
+    .markdown-content tr:nth-child(even) {
+      background: var(--bg-secondary);
+    }
+
+    .markdown-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+      margin-top: 48px;
+      background: var(--bg-card);
+      backdrop-filter: blur(10px);
+    }
+
+    .no-data {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 40px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 900px) {
+      .selector-container {
+        grid-template-columns: 1fr;
+      }
+
+      .vs-badge {
+        margin: 0 auto;
+      }
+
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-animation">
+    <div class="bg-grid"></div>
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="./index.html" class="brand">Stat<span>Court</span></a>
+      <ul class="nav-links">
+        <li><a href="./index.html">首页</a></li>
+        <li><a href="./data.html">数据</a></li>
+        <li><a href="./teams.html">球队</a></li>
+        <li><a href="./visualization.html">可视化</a></li>
+        <li><a href="./chat.html">AI助手</a></li>
+        <li><a href="./advanced.html">高阶数据</a></li>
+        <li><a href="./compare.html" class="active">对比</a></li>
+        <li><a href="./demo.html">3D展示</a></li>
+        <li><a href="./demo-advanced.html">3D高阶</a></li>
+        <li><a href="./map.html">球队地图</a></li>
+        <li><a href="./match.html">比赛模拟</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="header">
+      <h1>球员数据对比分析</h1>
+      <p>选择两位球员进行全方位数据对比，包含基础数据和高阶数据分析</p>
+    </div>
+
+    <div class="selector-container">
+      <div class="selector-card cyan">
+        <div class="selector-label">选择第一位球员</div>
+        <select class="player-select" id="player1Select">
+          <option value="">-- 请选择球员 --</option>
+        </select>
+        <div class="selected-player" id="player1Info" style="display: none;">
+          <div class="player-avatar-large" id="player1Avatar">?</div>
+          <div class="player-details">
+            <h3 id="player1Name">-</h3>
+            <div class="english-name" id="player1English">-</div>
+            <p id="player1Team">-</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="vs-badge">VS</div>
+
+      <div class="selector-card blue">
+        <div class="selector-label">选择第二位球员</div>
+        <select class="player-select" id="player2Select">
+          <option value="">-- 请选择球员 --</option>
+        </select>
+        <div class="selected-player" id="player2Info" style="display: none;">
+          <div class="player-avatar-large" id="player2Avatar">?</div>
+          <div class="player-details">
+            <h3 id="player2Name">-</h3>
+            <div class="english-name" id="player2English">-</div>
+            <p id="player2Team">-</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-grid" id="chartsContainer">
+      <div class="chart-card full-width">
+        <div class="chart-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          综合能力雷达图
+        </div>
+        <div class="chart-container large" id="radarChart"></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          基础数据对比（中文名）
+        </div>
+        <div class="chart-container" id="basicChart"></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+          </svg>
+          高阶数据对比（英文名）
+        </div>
+        <div class="chart-container" id="advancedChart"></div>
+      </div>
+
+      <div class="chart-card full-width">
+        <div class="chart-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="9" y1="21" x2="9" y2="9"></line>
+          </svg>
+          详细数据对比表
+        </div>
+        <div id="comparisonTable" class="no-data">请选择两位球员进行对比</div>
+      </div>
+    </div>
+
+    <div class="advanced-explanation">
+      <h4>📊 高阶数据指标解释</h4>
+      <div class="explanation-grid">
+        <div class="explanation-item">
+          <div class="metric-name">PER (Player Efficiency Rating)</div>
+          <div class="metric-desc">球员效率值，衡量球员每分钟贡献的综合指标，联盟平均为15.0</div>
+        </div>
+        <div class="explanation-item">
+          <div class="metric-name">WS (Win Shares)</div>
+          <div class="metric-desc">胜利贡献值，估算球员为球队贡献的胜场数</div>
+        </div>
+        <div class="explanation-item">
+          <div class="metric-name">BPM (Box Plus/Minus)</div>
+          <div class="metric-desc">正负值，估算球员在场时每百回合净胜分数，联盟平均为0</div>
+        </div>
+        <div class="explanation-item">
+          <div class="metric-name">VORP (Value Over Replacement)</div>
+          <div class="metric-desc">替代球员价值，衡量球员比替补球员多贡献的价值</div>
+        </div>
+        <div class="explanation-item">
+          <div class="metric-name">TS% (True Shooting %)</div>
+          <div class="metric-desc">真实命中率，综合考虑两分、三分和罚球的真实得分效率</div>
+        </div>
+        <div class="explanation-item">
+          <div class="metric-name">USG% (Usage Rate)</div>
+          <div class="metric-desc">使用率，球员在场时参与球队进攻回合的百分比</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-analysis-section">
+      <div style="text-align: center;">
+        <button class="ai-analysis-btn" id="aiAnalysisBtn" onclick="startAIAnalysis()" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          AI深度分析
+        </button>
+      </div>
+
+      <div class="ai-response-card" id="aiResponseCard">
+        <div class="ai-response-header">
+          <div class="ai-icon">🤖</div>
+          <div>
+            <h3>AI 分析报告</h3>
+            <p id="aiStatus">正在分析中...</p>
+          </div>
+        </div>
+        <div class="ai-response-content" id="aiResponseContent">
+          <div class="ai-loading">
+            <div class="spinner"></div>
+            <span>AI正在分析两位球员的数据，请稍候...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    Copyright ©2026 StatCourt · NBA数据球场
+  </footer>
+
+  <script>
+    const API_BASE_URL = 'http://localhost:8081';
+    const AI_CONFIG = {
+      endpoint: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+      apiKey: 'd094c09c2c7e47e2b4eba1f9a53a77b7.3fdg6FlIawgBcUEA',
+      model: 'glm-5'
+    };
+
+    let allPlayers = [];
+    let allAdvancedPlayers = [];
+    let player1Data = null;
+    let player2Data = null;
+    let radarChart = null;
+    let basicChart = null;
+    let advancedChart = null;
+
+    const nameMapping = {
+      '卢卡东契奇': 'Luka Dončić',
+      '谢伊吉尔杰斯-亚历山大': 'Shai Gilgeous-Alexander',
+      '安东尼爱德华兹': 'Anthony Edwards',
+      '泰雷塞马克西': 'Tyrese Maxey',
+      '杰伦布朗': 'Jaylen Brown',
+      '尼古拉约基奇': 'Nikola Jokić',
+      '多诺万米切尔': 'Donovan Mitchell',
+      '科怀伦纳德': 'Kawhi Leonard',
+      '扬尼斯安特托昆博': 'Giannis Antetokounmpo',
+      '斯蒂芬库里': 'Stephen Curry',
+      '勒布朗詹姆斯': 'LeBron James',
+      '詹姆斯哈登': 'James Harden',
+      '凯文杜兰特': 'Kevin Durant',
+      '杰森塔图姆': 'Jayson Tatum',
+      '安东尼戴维斯': 'Anthony Davis',
+      '德文布克': 'Devin Booker',
+      '布兰登英格拉姆': 'Brandon Ingram',
+      '拉梅洛鲍尔': 'LaMelo Ball',
+      '贾莫兰特': 'Ja Morant',
+      '贾伦杰克逊': 'Jaren Jackson Jr.',
+      '卡尔-安东尼唐斯': 'Karl-Anthony Towns',
+      '达米安利拉德': 'Damian Lillard',
+      '乔尔恩比德': 'Joel Embiid',
+      '特雷杨': 'Trae Young',
+      '凯里欧文': 'Kyrie Irving',
+      '保罗乔治': 'Paul George',
+      '吉米巴特勒': 'Jimmy Butler',
+      '克里斯保罗': 'Chris Paul',
+      '德马尔德罗赞': 'DeMar DeRozan',
+      '布拉德利比尔': 'Bradley Beal',
+      '卡尔安东尼唐斯': 'Karl-Anthony Towns',
+      '鲁迪戈贝尔': 'Rudy Gobert',
+      '本西蒙斯': 'Ben Simmons',
+      '帕斯卡尔西亚卡姆': 'Pascal Siakam',
+      '巴姆阿德巴约': 'Bam Adebayo',
+      '杰拉米格兰特': 'Jerami Grant',
+      '朱利叶斯兰德尔': 'Julius Randle',
+      '扎克拉文': 'Zach LaVine',
+      '德章泰默里': 'Dejounte Murray',
+      '弗雷德范弗利特': 'Fred VanVleet',
+      '迈克康利': 'Mike Conley',
+      '克莱汤普森': 'Klay Thompson',
+      '德拉蒙德格林': 'Draymond Green',
+      '安德鲁威金斯': 'Andrew Wiggins',
+      '马库斯斯马特': 'Marcus Smart',
+      '杰伦布伦森': 'Jalen Brunson',
+      '泰勒希罗': 'Tyler Herro',
+      '安东尼西蒙斯': 'Anfernee Simons',
+      '德斯蒙德贝恩': 'Desmond Bane',
+      '奥斯汀里夫斯': 'Austin Reaves',
+      '八村垒': 'Rui Hachimura',
+      '丹吉洛拉塞尔': "D'Angelo Russell",
+      '贾里德艾伦': 'Jarrett Allen',
+      '埃文莫布利': 'Evan Mobley',
+      '达里厄斯加兰': 'Darius Garland',
+      '斯科蒂巴恩斯': 'Scottie Barnes',
+      '凯德坎宁安': 'Cade Cunningham',
+      '弗朗茨瓦格纳': 'Franz Wagner',
+      '保罗班凯罗': 'Paolo Banchero',
+      '维克托文班亚马': 'Victor Wembanyama',
+      '切特霍姆格伦': 'Chet Holmgren',
+      '斯科蒂亨德森': 'Scoot Henderson',
+      '布兰登米勒': 'Brandon Miller'
+    };
+
+    marked.setOptions({
+      breaks: true,
+      gfm: true
+    });
+
+    document.getElementById('player1Select').addEventListener('change', function() {
+      updatePlayerInfo(1, this.value);
+      updateCharts();
+    });
+
+    document.getElementById('player2Select').addEventListener('change', function() {
+      updatePlayerInfo(2, this.value);
+      updateCharts();
+    });
+
+    async function loadData() {
+      try {
+        const [basicRes, advancedRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/data`),
+          fetch(`${API_BASE_URL}/api/advanced/all?orderBy=bpm&limit=700`)
+        ]);
+
+        const basicData = await basicRes.json();
+        const advancedData = await advancedRes.json();
+
+        if (basicData.code === 200 || basicData.code === 0) {
+          allPlayers = basicData.data.players || [];
+        }
+
+        if (advancedData.code === 200 || advancedData.code === 0) {
+          allAdvancedPlayers = advancedData.data || [];
+        }
+
+        console.log('基础数据球员数:', allPlayers.length);
+        console.log('高阶数据球员数:', allAdvancedPlayers.length);
+
+        updateSelectors();
+        initCharts();
+      } catch (error) {
+        console.error('加载数据失败:', error);
+      }
+    }
+
+    function findAdvancedPlayer(chineseName) {
+      const englishName = nameMapping[chineseName];
+      
+      if (englishName) {
+        let found = allAdvancedPlayers.find(p => 
+          p.player && p.player.toLowerCase() === englishName.toLowerCase()
+        );
+        if (found) return found;
+        
+        const lastName = englishName.split(' ').pop();
+        found = allAdvancedPlayers.find(p => 
+          p.player && p.player.toLowerCase().includes(lastName.toLowerCase())
+        );
+        if (found) return found;
+      }
+
+      for (const [cnName, enName] of Object.entries(nameMapping)) {
+        if (chineseName.includes(cnName) || cnName.includes(chineseName)) {
+          let found = allAdvancedPlayers.find(p => 
+            p.player && p.player.toLowerCase() === enName.toLowerCase()
+          );
+          if (found) return found;
+          
+          const lastName = enName.split(' ').pop();
+          found = allAdvancedPlayers.find(p => 
+            p.player && p.player.toLowerCase().includes(lastName.toLowerCase())
+          );
+          if (found) return found;
+        }
+      }
+
+      return null;
+    }
+
+    function updateSelectors() {
+      const select1 = document.getElementById('player1Select');
+      const select2 = document.getElementById('player2Select');
+      
+      select1.innerHTML = '<option value="">-- 请选择球员 --</option>';
+      select2.innerHTML = '<option value="">-- 请选择球员 --</option>';
+
+      allPlayers.forEach(p => {
+        select1.innerHTML += `<option value="${p.playerName}">${p.playerName} (${p.team})</option>`;
+        select2.innerHTML += `<option value="${p.playerName}">${p.playerName} (${p.team})</option>`;
+      });
+    }
+
+    function updatePlayerInfo(num, name) {
+      if (!name) {
+        document.getElementById(`player${num}Info`).style.display = 'none';
+        if (num === 1) player1Data = null;
+        else player2Data = null;
+        updateAIButton();
+        return;
+      }
+
+      let data = allPlayers.find(p => p.playerName === name);
+      if (data) {
+        const advanced = findAdvancedPlayer(name);
+        const englishName = nameMapping[name] || advanced?.player || '-';
+        console.log(`球员 ${name} 英文名: ${englishName}, 高阶数据:`, advanced);
+        
+        if (advanced) {
+          data = { 
+            ...data, 
+            englishName: advanced.player,
+            per: advanced.per,
+            ws: advanced.ws,
+            bpm: advanced.bpm,
+            vorp: advanced.vorp,
+            obpm: advanced.obpm,
+            dbpm: advanced.dbpm,
+            ows: advanced.ows,
+            dws: advanced.dws,
+            ws48: advanced.ws_48,
+            tsPct: advanced.ts_pct,
+            usgPct: advanced.usg_pct,
+            orbPct: advanced.orb_pct,
+            drbPct: advanced.drb_pct,
+            trbPct: advanced.trb_pct,
+            astPct: advanced.ast_pct,
+            stlPct: advanced.stl_pct,
+            blkPct: advanced.blk_pct,
+            tovPct: advanced.tov_pct,
+            threePar: advanced.three_par,
+            ftr: advanced.ftr
+          };
+        } else {
+          data.englishName = englishName;
+        }
+      }
+
+      if (num === 1) player1Data = data;
+      else player2Data = data;
+
+      if (data) {
+        document.getElementById(`player${num}Info`).style.display = 'flex';
+        const avatar = document.getElementById(`player${num}Avatar`);
+        if (data.playerImage) {
+          avatar.innerHTML = `<img src="${data.playerImage}" alt="${name}">`;
+        } else {
+          avatar.textContent = name.charAt(0);
+        }
+        document.getElementById(`player${num}Name`).textContent = name;
+        document.getElementById(`player${num}English`).textContent = data.englishName || '-';
+        document.getElementById(`player${num}Team`).textContent = `${data.team || '-'} · ${data.score || '-'}分`;
+      }
+      
+      updateAIButton();
+    }
+
+    function updateAIButton() {
+      const btn = document.getElementById('aiAnalysisBtn');
+      btn.disabled = !(player1Data && player2Data);
+    }
+
+    function initCharts() {
+      radarChart = echarts.init(document.getElementById('radarChart'));
+      basicChart = echarts.init(document.getElementById('basicChart'));
+      advancedChart = echarts.init(document.getElementById('advancedChart'));
+      
+      window.addEventListener('resize', () => {
+        radarChart.resize();
+        basicChart.resize();
+        advancedChart.resize();
+      });
+    }
+
+    function clearCharts() {
+      radarChart.clear();
+      basicChart.clear();
+      advancedChart.clear();
+      document.getElementById('comparisonTable').innerHTML = '<p class="no-data">请选择两位球员进行对比</p>';
+    }
+
+    function updateCharts() {
+      if (!player1Data && !player2Data) {
+        clearCharts();
+        return;
+      }
+      updatePlayerCharts();
+    }
+
+    function updatePlayerCharts() {
+      const metrics = ['得分', '篮板', '助攻', '抢断', '盖帽'];
+      const maxValues = [40, 15, 15, 3, 3];
+
+      const data1 = player1Data ? [
+        player1Data.score || 0,
+        player1Data.rebound || 0,
+        player1Data.assist || 0,
+        player1Data.steal || 0,
+        player1Data.block || 0
+      ] : [0, 0, 0, 0, 0];
+
+      const data2 = player2Data ? [
+        player2Data.score || 0,
+        player2Data.rebound || 0,
+        player2Data.assist || 0,
+        player2Data.steal || 0,
+        player2Data.block || 0
+      ] : [0, 0, 0, 0, 0];
+
+      const p1DisplayName = player1Data?.playerName || '球员1';
+      const p2DisplayName = player2Data?.playerName || '球员2';
+
+      radarChart.setOption({
+        color: ['#06b6d4', '#3b82f6'],
+        legend: {
+          data: [p1DisplayName, p2DisplayName],
+          textStyle: { color: '#94a3b8' },
+          top: 10
+        },
+        radar: {
+          indicator: metrics.map((m, i) => ({ name: m, max: maxValues[i] })),
+          axisName: { color: '#94a3b8' },
+          splitArea: { areaStyle: { color: ['rgba(6, 182, 212, 0.05)', 'rgba(6, 182, 212, 0.1)'] } },
+          splitLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.1)' } },
+          axisLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.1)' } }
+        },
+        series: [{
+          type: 'radar',
+          data: [
+            { value: data1, name: p1DisplayName, areaStyle: { opacity: 0.3 } },
+            { value: data2, name: p2DisplayName, areaStyle: { opacity: 0.3 } }
+          ]
+        }]
+      });
+
+      basicChart.setOption({
+        color: ['#06b6d4', '#3b82f6'],
+        title: {
+          text: '基础数据对比（中文名）',
+          left: 'center',
+          textStyle: { color: '#94a3b8', fontSize: 12, fontWeight: 'normal' },
+          top: 0
+        },
+        tooltip: { trigger: 'axis' },
+        legend: {
+          data: [p1DisplayName, p2DisplayName],
+          textStyle: { color: '#94a3b8' },
+          top: 25
+        },
+        xAxis: {
+          type: 'category',
+          data: ['得分', '篮板', '助攻', '抢断', '盖帽'],
+          axisLabel: { color: '#94a3b8' },
+          axisLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.1)' } }
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: { color: '#94a3b8' },
+          splitLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.05)' } }
+        },
+        series: [
+          { name: p1DisplayName, type: 'bar', data: data1, barWidth: '30%' },
+          { name: p2DisplayName, type: 'bar', data: data2, barWidth: '30%' }
+        ]
+      });
+
+      const advMetrics = ['PER', 'WS', 'BPM', 'VORP'];
+      const advData1 = player1Data ? [
+        parseFloat(player1Data.per) || 0,
+        parseFloat(player1Data.ws) || 0,
+        parseFloat(player1Data.bpm) || 0,
+        parseFloat(player1Data.vorp) || 0
+      ] : [0, 0, 0, 0];
+      const advData2 = player2Data ? [
+        parseFloat(player2Data.per) || 0,
+        parseFloat(player2Data.ws) || 0,
+        parseFloat(player2Data.bpm) || 0,
+        parseFloat(player2Data.vorp) || 0
+      ] : [0, 0, 0, 0];
+
+      const p1EnglishName = player1Data?.englishName || player1Data?.playerName || 'Player 1';
+      const p2EnglishName = player2Data?.englishName || player2Data?.playerName || 'Player 2';
+
+      advancedChart.setOption({
+        color: ['#06b6d4', '#3b82f6'],
+        title: {
+          text: '高阶数据对比（英文名）',
+          left: 'center',
+          textStyle: { color: '#94a3b8', fontSize: 12, fontWeight: 'normal' },
+          top: 0
+        },
+        tooltip: { 
+          trigger: 'axis',
+          formatter: function(params) {
+            let result = params[0].axisValue + '<br/>';
+            params.forEach(item => {
+              result += `${item.marker} ${item.seriesName}: ${item.value.toFixed(2)}<br/>`;
+            });
+            return result;
+          }
+        },
+        legend: {
+          data: [p1EnglishName, p2EnglishName],
+          textStyle: { color: '#94a3b8' },
+          top: 25
+        },
+        xAxis: {
+          type: 'category',
+          data: advMetrics,
+          axisLabel: { color: '#94a3b8' },
+          axisLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.1)' } }
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: { color: '#94a3b8' },
+          splitLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.05)' } }
+        },
+        series: [
+          { name: p1EnglishName, type: 'line', smooth: true, data: advData1, symbolSize: 10 },
+          { name: p2EnglishName, type: 'line', smooth: true, data: advData2, symbolSize: 10 }
+        ]
+      });
+
+      updateComparisonTable(data1, data2, advData1, advData2);
+    }
+
+    function updateComparisonTable(data1, data2, advData1, advData2) {
+      const basicMetrics = ['得分', '篮板', '助攻', '抢断', '盖帽'];
+      const advMetrics = ['PER', 'WS', 'BPM', 'VORP'];
+      
+      const p1Name = player1Data?.playerName || '-';
+      const p2Name = player2Data?.playerName || '-';
+      const p1English = player1Data?.englishName || '-';
+      const p2English = player2Data?.englishName || '-';
+      
+      let html = `
+        <div style="margin-bottom: 16px; padding: 12px; background: var(--bg-secondary); border-radius: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="text-align: center; flex: 1;">
+              <div style="font-weight: 600; color: var(--accent-light);">${p1Name}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">${p1English}</div>
+            </div>
+            <div style="padding: 0 20px; color: var(--text-muted);">VS</div>
+            <div style="text-align: center; flex: 1;">
+              <div style="font-weight: 600; color: var(--accent2-light);">${p2Name}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">${p2English}</div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      html += '<div class="section-title"><span class="icon">📊</span>基础数据对比（中文名）</div>';
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
+      
+      basicMetrics.forEach((m, i) => {
+        const v1 = data1[i];
+        const v2 = data2[i];
+        const winner = v1 > v2 ? 1 : (v2 > v1 ? 2 : 0);
+        html += `
+          <div class="stat-item ${winner === 1 ? 'winner' : ''}">
+            <span class="label">${m}</span>
+            <div class="values">
+              <span class="value-cyan">${v1.toFixed(1)}</span>
+              <span class="value-blue">${v2.toFixed(1)}</span>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+
+      html += '<div class="section-title"><span class="icon">📈</span>高阶数据对比（英文名）</div>';
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
+
+      advMetrics.forEach((m, i) => {
+        const v1 = advData1[i];
+        const v2 = advData2[i];
+        const winner = v1 > v2 ? 1 : (v2 > v1 ? 2 : 0);
+        html += `
+          <div class="stat-item ${winner === 1 ? 'winner' : ''}">
+            <span class="label">${m}</span>
+            <div class="values">
+              <span class="value-cyan">${v1.toFixed(2)}</span>
+              <span class="value-blue">${v2.toFixed(2)}</span>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+
+      html += '<div class="section-title"><span class="icon">🎯</span>效率指标对比</div>';
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
+      
+      const efficiencyMetrics = [
+        { label: '真实命中率TS%', key: 'tsPct', format: v => (v ? (v * 100).toFixed(1) + '%' : '-') },
+        { label: '使用率USG%', key: 'usgPct', format: v => (v ? v.toFixed(1) + '%' : '-') },
+        { label: '进攻WS', key: 'ows', format: v => (v ? v.toFixed(1) : '-') },
+        { label: '防守WS', key: 'dws', format: v => (v ? v.toFixed(1) : '-') },
+        { label: '进攻BPM', key: 'obpm', format: v => (v ? v.toFixed(1) : '-') },
+        { label: '防守BPM', key: 'dbpm', format: v => (v ? v.toFixed(1) : '-') }
+      ];
+
+      efficiencyMetrics.forEach(m => {
+        const v1 = player1Data?.[m.key];
+        const v2 = player2Data?.[m.key];
+        const v1Formatted = m.format(v1);
+        const v2Formatted = m.format(v2);
+        const v1Num = parseFloat(v1) || 0;
+        const v2Num = parseFloat(v2) || 0;
+        const winner = v1Num > v2Num ? 1 : (v2Num > v1Num ? 2 : 0);
+        html += `
+          <div class="stat-item ${winner === 1 ? 'winner' : ''}">
+            <span class="label">${m.label}</span>
+            <div class="values">
+              <span class="value-cyan">${v1Formatted}</span>
+              <span class="value-blue">${v2Formatted}</span>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+
+      document.getElementById('comparisonTable').innerHTML = html;
+    }
+
+    async function startAIAnalysis() {
+      if (!player1Data || !player2Data) return;
+
+      const p1 = player1Data;
+      const p2 = player2Data;
+
+      const card = document.getElementById('aiResponseCard');
+      const content = document.getElementById('aiResponseContent');
+      const status = document.getElementById('aiStatus');
+      const btn = document.getElementById('aiAnalysisBtn');
+
+      card.classList.add('show');
+      content.innerHTML = `
+        <div class="ai-loading">
+          <div class="spinner"></div>
+          <span>AI正在分析两位球员的数据，请稍候...</span>
+        </div>
+      `;
+      status.textContent = '正在分析中...';
+      btn.disabled = true;
+
+      const prompt = `请分析以下两位NBA球员的数据对比：
+
+**球员1：${p1.playerName} (${p1.englishName || '-'})**
+- 球队: ${p1.team}
+- 基础数据: 得分${p1.score || 0}、篮板${p1.rebound || 0}、助攻${p1.assist || 0}、抢断${p1.steal || 0}、盖帽${p1.block || 0}
+- 高阶数据: PER ${p1.per || '-'}、WS ${p1.ws || '-'}、BPM ${p1.bpm || '-'}、VORP ${p1.vorp || '-'}
+
+**球员2：${p2.playerName} (${p2.englishName || '-'})**
+- 球队: ${p2.team}
+- 基础数据: 得分${p2.score || 0}、篮板${p2.rebound || 0}、助攻${p2.assist || 0}、抢断${p2.steal || 0}、盖帽${p2.block || 0}
+- 高阶数据: PER ${p2.per || '-'}、WS ${p2.ws || '-'}、BPM ${p2.bpm || '-'}、VORP ${p2.vorp || '-'}
+
+请从以下几个方面进行深度分析：
+
+1. **技术特点对比** - 分析两位球员的技术风格和特点
+2. **进攻效率对比** - 比较得分能力和进攻效率
+3. **防守能力对比** - 分析防守端的表现
+4. **球队作用** - 在各自球队中的定位和作用
+5. **综合评价** - 给出综合实力评估和优劣势分析
+
+请使用Markdown格式回答，包含标题、列表、加粗等格式。`;
+
+      try {
+        const response = await fetch(AI_CONFIG.endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${AI_CONFIG.apiKey}`
+          },
+          body: JSON.stringify({
+            model: AI_CONFIG.model,
+            messages: [
+              {
+                role: 'system',
+                content: '你是NBA数据分析专家，专注于NBA篮球数据分析和统计。请用专业、详细的中文回答用户问题，使用Markdown格式组织内容。'
+              },
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            temperature: 0.7,
+            stream: false
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error?.message || `API请求失败: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const aiMessage = data.choices[0].message.content;
+
+        status.textContent = '分析完成';
+        content.innerHTML = `<div class="markdown-content">${marked.parse(aiMessage)}</div>`;
+
+      } catch (error) {
+        status.textContent = '分析失败';
+        content.innerHTML = `
+          <div style="color: var(--danger); padding: 20px; text-align: center;">
+            <p>抱歉，AI分析过程中发生错误：</p>
+            <p style="margin-top: 10px; font-size: 0.9rem;">${error.message}</p>
+          </div>
+        `;
+        console.error('AI分析错误:', error);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadData);
+  </script>
+  <script src="./js/gsap-animations.js"></script>
+</body>
+</html>

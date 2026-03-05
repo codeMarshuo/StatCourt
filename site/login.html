@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>登录 · StatCourt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="./css/weblogin.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playwrite+NZ+Basic:wght@100..400&display=swap" rel="stylesheet">
+</head>
+<body>
+  <main class="login-page">
+    <div class="login-stage">
+      <section class="login-hero" aria-label="品牌介绍">
+        <div class="brand-mark">
+          <img src="./assets/logo.png" alt="StatCourt">
+        </div>
+        <h1 class="login-title">Where amazing happens</h1>
+        <p class="login-sub">
+          奇迹诞生之地
+          <span class="login-sub-strong"></span>
+        </p>
+        <div class="login-meta">
+          <span class="pill">数据分析</span>
+          <span class="pill">可视化</span>
+          <span class="pill">对比</span>
+        </div>
+      </section>
+
+      <section class="login-card" aria-label="登录注册表单">
+        <div class="card-top">
+          <div class="tabs" role="tablist" aria-label="登录注册切换">
+            <button id="tab-login" class="tab active" role="tab" aria-selected="true" aria-controls="form-login">登录</button>
+            <button id="tab-register" class="tab" role="tab" aria-selected="false" aria-controls="form-register">注册</button>
+          </div>
+        </div>
+
+        <form id="form-login" class="form" autocomplete="off" aria-label="登录表单" method="POST" onsubmit="return false;">
+          <label>账号<input type="text" id="login-username" placeholder="请输入账号" required></label>
+          <label>密码<input type="password" id="login-password" placeholder="请输入密码" required></label>
+          <button type="submit" class="btn primary">登录</button>
+        </form>
+
+        <form id="form-register" class="form hidden" autocomplete="off" aria-label="注册表单" method="POST" onsubmit="return false;">
+          <label>账号<input type="text" id="reg-username" placeholder="请输入账号" required></label>
+          <label>密码<input type="password" id="reg-password" placeholder="至少6位" required></label>
+          <label>确认密码<input type="password" id="reg-password2" placeholder="再次输入密码" required></label>
+          <button type="submit" class="btn primary">注册</button>
+        </form>
+
+        <p class="muted">注册后即可访问</p>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"></script>
+  <script>
+    const API_BASE_URL = 'http://localhost:8081';
+    
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+    const formLogin = document.getElementById('form-login');
+    const formRegister = document.getElementById('form-register');
+
+    function showTip(msg) {
+      alert(msg);
+    }
+
+    function getErrorMessage(error) {
+      if (error.response) {
+        const res = error.response.data;
+        if (res && res.message) return res.message;
+        if (res && res.msg) return res.msg;
+        
+        switch (error.response.status) {
+          case 401: return '用户名或密码错误';
+          case 400: return '请求参数错误';
+          case 500: return '服务器内部错误';
+          default: return `请求失败 (${error.response.status})`;
+        }
+      } else if (error.request) {
+        return '网络连接失败，请检查后端服务是否启动';
+      } else {
+        return error.message || '未知错误';
+      }
+    }
+
+    function showLogin() {
+      tabLogin.classList.add('active');
+      tabRegister.classList.remove('active');
+      formLogin.classList.remove('hidden');
+      formRegister.classList.add('hidden');
+      tabLogin.setAttribute('aria-selected', 'true');
+      tabRegister.setAttribute('aria-selected', 'false');
+    }
+
+    function showRegister() {
+      tabRegister.classList.add('active');
+      tabLogin.classList.remove('active');
+      formRegister.classList.remove('hidden');
+      formLogin.classList.add('hidden');
+      tabRegister.setAttribute('aria-selected', 'true');
+      tabLogin.setAttribute('aria-selected', 'false');
+    }
+
+    tabLogin.addEventListener('click', showLogin);
+    tabRegister.addEventListener('click', showRegister);
+
+    formLogin.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value.trim();
+
+      if (!username) { showTip('请输入用户名！'); return; }
+      if (!password) { showTip('请输入密码！'); return; }
+
+      const loginBtn = formLogin.querySelector('button[type="submit"]');
+      const originalText = loginBtn.textContent;
+      loginBtn.disabled = true;
+      loginBtn.textContent = '登录中...';
+
+      try {
+        const response = await axios({
+          method: 'POST',
+          url: `${API_BASE_URL}/api/login`,
+          headers: { 'Content-Type': 'application/json' },
+          data: { username, password }
+        });
+
+        const res = response.data;
+        if (res && (res.code === 200 || res.code === 1)) {
+          if (res.data && res.data.token) {
+            localStorage.setItem('token', res.data.token);
+            localStorage.setItem('username', username);
+          }
+          showTip('登录成功！');
+          setTimeout(() => {
+            window.location.href = './index.html';
+          }, 50);
+        } else {
+          showTip(res.message || res.msg || '登录失败');
+        }
+      } catch (error) {
+        showTip(getErrorMessage(error));
+        console.error('登录请求错误：', error);
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = originalText;
+      }
+    });
+
+    formRegister.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('reg-username').value.trim();
+      const password = document.getElementById('reg-password').value.trim();
+      const password2 = document.getElementById('reg-password2').value.trim();
+
+      if (!username) { showTip('请输入用户名！'); return; }
+      if (password.length < 6) { showTip('密码至少6位！'); return; }
+      if (password !== password2) { showTip('两次密码不一致！'); return; }
+
+      const registerBtn = formRegister.querySelector('button[type="submit"]');
+      const originalText = registerBtn.textContent;
+      registerBtn.disabled = true;
+      registerBtn.textContent = '注册中...';
+
+      try {
+        const response = await axios({
+          method: 'POST',
+          url: `${API_BASE_URL}/api/register`,
+          headers: { 'Content-Type': 'application/json' },
+          data: { username, password }
+        });
+
+        const res = response.data;
+        if (res && (res.code === 200 || res.code === 0)) {
+          showTip('注册成功！请登录');
+          setTimeout(() => {
+            showLogin();
+            document.getElementById('login-username').value = username;
+            document.getElementById('login-password').focus();
+          }, 500);
+        } else {
+          showTip(res.message || res.msg || '注册失败');
+        }
+      } catch (error) {
+        showTip(getErrorMessage(error));
+        console.error('注册请求错误：', error);
+      } finally {
+        registerBtn.disabled = false;
+        registerBtn.textContent = originalText;
+      }
+    });
+  </script>
+</body>
+</html>

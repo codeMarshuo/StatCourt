@@ -1,0 +1,735 @@
+/* ========== 字体与页面基础 ========== */
+.teams-page {
+  --font-display: 'Noto Serif SC', 'ZCOOL XiaoWei', serif;
+  --font-body: 'Noto Serif SC', 'ZCOOL XiaoWei', Georgia, serif;
+}
+
+.teams-page {
+  min-height: 100vh;
+  font-family: var(--font-body);
+  background: linear-gradient(135deg, #050b14 0%, #0a1a2e 50%, #050b14 100%);
+  position: relative;
+}
+
+.teams-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 120% 80% at 20% 10%, rgba(0, 212, 255, 0.1), transparent 50%),
+    radial-gradient(ellipse 100% 60% at 80% 90%, rgba(120, 80, 200, 0.08), transparent 50%);
+  pointer-events: none;
+}
+
+/* ========== 主布局：左侧列表 + 右侧详情 ========== */
+.teams-main {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: calc(100vh - 120px);
+  padding-top: 72px;
+  gap: 0;
+}
+
+.teams-left {
+  padding: 24px 20px 24px;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
+  overflow-y: visible;
+  display: flex;
+  flex-direction: column;
+}
+
+.teams-left::-webkit-scrollbar {
+  width: 6px;
+}
+
+.teams-left::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.teams-left::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.teams-left::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.teams-header {
+  margin-bottom: 24px;
+  padding: 0 8px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.conference-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 0 16px;
+}
+
+.teams-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.02em;
+  margin-bottom: 4px;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+}
+
+.tab-btn {
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.2, 0.9, 0.2, 1);
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
+.tab-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(0, 212, 255, 0.3);
+  color: #00d4ff;
+  transform: translateY(-1px);
+}
+
+.tab-btn.active {
+  background: linear-gradient(90deg, #00d4ff, #3bc9ff);
+  color: #023046;
+  border-color: #00d4ff;
+  box-shadow: 0 4px 16px rgba(0, 212, 255, 0.3);
+}
+
+.tab-btn.active:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+}
+
+.teams-subtitle {
+  font-size: 13px;
+  color: rgba(155, 209, 227, 0.75);
+  letter-spacing: 0.05em;
+  display: none;
+}
+
+/* ========== 球队列表与卡片（渐变色 + 动效） ========== */
+.teams-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  flex-grow: 1;
+  min-height: 0;
+}
+
+.team-item {
+  padding: 12px 16px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateX(-16px);
+  animation: teamItemReveal 0.5s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
+  transition: all 0.3s cubic-bezier(0.2, 0.9, 0.2, 1);
+  border-radius: 8px;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.team-item:hover {
+  color: #00d4ff;
+  background: rgba(0, 212, 255, 0.08);
+  border-color: rgba(0, 212, 255, 0.2);
+  transform: translateX(-8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.team-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background: linear-gradient(to bottom, #00d4ff, #3bc9ff);
+  border-radius: 0 3px 3px 0;
+  transition: height 0.3s ease;
+}
+
+.team-item:hover::before {
+  height: 70%;
+}
+
+.logo-container {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.team-logo,
+.team-banner {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+  transition: all 0.3s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.team-logo {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+.team-banner {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transform: scale(0.8) rotate(-5deg);
+  z-index: 1;
+}
+
+.team-item:hover .team-logo {
+  opacity: 0;
+  transform: scale(0.8) rotate(5deg);
+}
+
+.team-item:hover .team-banner {
+  opacity: 1;
+  transform: scale(1.15) rotate(0deg);
+  box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+}
+
+.team-item:hover .team-logo {
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
+}
+
+.team-name {
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes teamItemReveal {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+
+/* ========== 右侧详情区：毛玻璃 + 动态显示 ========== */
+.teams-right {
+  position: relative;
+  padding: 32px;
+  overflow: auto;
+  opacity: 0;
+  transform: translateX(24px);
+  pointer-events: none;
+  transition: opacity 0.4s cubic-bezier(0.2, 0.9, 0.2, 1),
+              transform 0.4s cubic-bezier(0.2, 0.9, 0.2, 1),
+              pointer-events 0s 0.4s;
+}
+
+.teams-right::-webkit-scrollbar {
+  width: 8px;
+}
+
+.teams-right::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.teams-right::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.teams-right::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.teams-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+  transition: opacity 0.4s cubic-bezier(0.2, 0.9, 0.2, 1),
+              transform 0.4s cubic-bezier(0.2, 0.9, 0.2, 1),
+              pointer-events 0s 0s;
+}
+
+.detail-glass {
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(165deg, rgba(18, 28, 45, 0.9), rgba(6, 12, 22, 0.95));
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 24px 64px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  animation: detailIn 0.5s cubic-bezier(0.2, 0.9, 0.2, 1);
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+@keyframes detailIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.detail-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 400px;
+  gap: 0;
+}
+
+.detail-media {
+  position: relative;
+  min-height: 400px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detail-hero-img {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  object-fit: cover;
+  display: none;
+  animation: imgFade 0.5s ease;
+  transition: transform 0.6s ease;
+}
+
+.detail-media:hover .detail-hero-img {
+  transform: scale(1.05);
+}
+
+.detail-hero-img[src] {
+  display: block;
+}
+
+@keyframes imgFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.detail-media-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.08) 50%, transparent 60%);
+  pointer-events: none;
+  animation: shine 3s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+.detail-image-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(234, 246, 251, 0.9);
+  font-family: var(--font-body);
+  text-align: center;
+  overflow: hidden;
+  transition: all 0.5s ease;
+}
+
+.detail-image-placeholder.hidden {
+  display: none;
+}
+
+.default-hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.6) contrast(1.1);
+  animation: defaultImageZoom 20s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes defaultImageZoom {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.placeholder-content {
+  position: relative;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  padding: 40px 60px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: fadeInUp 1s ease-out;
+  text-align: center;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.placeholder-content span {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: #00d4ff;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 20px rgba(0, 212, 255, 0.5);
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.placeholder-content small {
+  font-size: 14px;
+  color: rgba(234, 246, 251, 0.7);
+  letter-spacing: 0.05em;
+}
+
+.detail-image-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 212, 255, 0.1) 0%,
+    transparent 50%,
+    rgba(0, 212, 255, 0.1) 100%
+  );
+  animation: shimmer 8s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(45deg);
+  }
+}
+
+.detail-content {
+  padding: 36px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.detail-name {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  animation: slideInUp 0.5s ease;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.detail-meta {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: rgba(155, 209, 227, 0.95);
+  margin: 0;
+  letter-spacing: 0.02em;
+  animation: slideInUp 0.5s ease 0.1s both;
+}
+
+.detail-stats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 16px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  animation: slideInUp 0.5s ease 0.2s both;
+}
+
+.stat-item {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(0, 212, 255, 0.95);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-item::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: #00d4ff;
+  border-radius: 50%;
+}
+
+.detail-desc {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: rgba(234, 246, 251, 0.88);
+  line-height: 1.7;
+  flex: 1;
+  animation: slideInUp 0.5s ease 0.3s both;
+}
+
+.detail-desc p {
+  margin: 0 0 8px 0;
+}
+
+.detail-desc p:last-child {
+  margin-bottom: 0;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  animation: slideInUp 0.5s ease 0.4s both;
+}
+
+.detail-actions .btn {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s cubic-bezier(0.2, 0.9, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.detail-actions .btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.detail-actions .btn:hover::before {
+  left: 100%;
+}
+
+.detail-actions .btn-primary {
+  background: linear-gradient(90deg, #00d4ff, #3bc9ff);
+  color: #023046;
+}
+
+.detail-actions .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 212, 255, 0.35);
+}
+
+.detail-actions .btn-ghost {
+  background: rgba(255, 255, 255, 0.06);
+  color: #9bd1e3;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.detail-actions .btn-ghost:hover {
+  border-color: rgba(0, 212, 255, 0.4);
+  color: #00d4ff;
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 1200px) {
+  .teams-main {
+    grid-template-columns: 260px 1fr;
+  }
+
+  .teams-left {
+    padding: 20px 16px 20px;
+  }
+
+  .team-item {
+    font-size: 13px;
+    padding: 8px 14px;
+  }
+
+  .teams-right {
+    padding: 20px;
+  }
+
+  .detail-inner {
+    min-height: 360px;
+  }
+
+  .detail-media {
+    min-height: 360px;
+  }
+
+  .detail-content {
+    padding: 28px 24px 24px;
+  }
+
+  .detail-name {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 900px) {
+  .teams-main {
+    grid-template-columns: 1fr;
+  }
+
+  .teams-left {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 20px;
+    max-height: none;
+  }
+
+  .teams-list {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+  }
+
+  .team-item {
+    font-size: 13px;
+    padding: 10px 14px;
+    text-align: center;
+  }
+
+  .team-item:hover {
+    padding-left: 14px;
+  }
+
+  .detail-inner {
+    grid-template-columns: 1fr;
+    min-height: 320px;
+  }
+
+  .detail-media {
+    min-height: 280px;
+  }
+
+  .detail-content {
+    padding: 24px;
+  }
+
+  .detail-name {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  .teams-title {
+    font-size: 24px;
+  }
+
+  .team-item {
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+
+  .teams-right {
+    padding: 16px;
+  }
+
+  .detail-glass {
+    border-radius: 16px;
+  }
+
+  .detail-content {
+    padding: 20px 16px 16px;
+    gap: 16px;
+  }
+
+  .detail-name {
+    font-size: 22px;
+  }
+
+  .detail-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .detail-actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+}
