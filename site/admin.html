@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>管理后台 · StatCourt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg-primary: #0a0f1a;
+      --bg-secondary: rgba(15, 25, 40, 0.95);
+      --bg-card: rgba(20, 35, 55, 0.9);
+      --accent: #06b6d4;
+      --accent-light: #22d3ee;
+      --accent2: #8b5cf6;
+      --text-primary: #f0f9ff;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: rgba(148, 163, 184, 0.15);
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+    }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 100px 24px 40px;
+    }
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .page-title::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(180deg, var(--accent), var(--accent2));
+      border-radius: 2px;
+    }
+    .page-title small {
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+    .admin-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--accent2), #c084fc);
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      letter-spacing: 0.05em;
+    }
+    .user-badge {
+      display: inline-block;
+      background: rgba(148, 163, 184, 0.2);
+      color: var(--text-secondary);
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      letter-spacing: 0.05em;
+    }
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stats-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-box {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-box .num {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent-light);
+    }
+    .stat-box .label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .table-wrap {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    th {
+      text-align: left;
+      padding: 12px 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 14px 10px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+      vertical-align: middle;
+    }
+    tr:hover td {
+      background: rgba(6, 182, 212, 0.03);
+    }
+    .btn {
+      padding: 8px 16px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.7rem;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white;
+    }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--error);
+    }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.25); }
+    .btn-warning {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: var(--warning);
+    }
+    .btn-warning:hover { background: rgba(245, 158, 11, 0.25); }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(16, 185, 129, 0.95);
+      color: white;
+      padding: 14px 28px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .toast.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+    .toast.error {
+      background: rgba(239, 68, 68, 0.95);
+    }
+    .not-admin {
+      text-align: center;
+      padding: 80px 20px;
+    }
+    .not-admin h2 { margin-bottom: 12px; }
+    .not-admin p { color: var(--text-muted); margin-bottom: 24px; }
+    .search-box {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .search-box input {
+      flex: 1;
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .search-box input:focus { border-color: var(--accent); }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      padding: 32px;
+      width: 400px;
+      max-width: 90vw;
+    }
+    .modal h3 {
+      font-size: 1rem;
+      margin-bottom: 20px;
+    }
+    .modal .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .modal .form-group label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .modal .form-group input {
+      padding: 10px 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .modal .form-group input:focus { border-color: var(--accent); }
+    .modal .btn-group {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+    }
+    @media (max-width: 768px) {
+      .stats-row { flex-direction: column; }
+      td { font-size: 0.75rem; padding: 10px 6px; }
+    }
+  </style>
+</head>
+<body>
+  <script src="./js/nav.js"></script>
+
+  <div class="container">
+    <div id="toast" class="toast"><span id="toastText"></span></div>
+
+    <div id="notAdmin" class="not-admin" style="display:none;">
+      <h2>无权限访问</h2>
+      <p>仅管理员可访问管理后台</p>
+      <a href="./index.html" class="btn btn-primary">返回首页</a>
+    </div>
+
+    <div id="notLoggedIn" class="not-admin" style="display:none;">
+      <h2>请先登录</h2>
+      <p>登录后验证管理员权限</p>
+      <a href="./login.html" class="btn btn-primary">去登录</a>
+    </div>
+
+    <div id="adminContent" style="display:none;">
+      <h1 class="page-title">管理后台 <small>用户管理</small></h1>
+
+      <div class="stats-row" id="statsRow">
+        <div class="stat-box">
+          <div class="num" id="totalUsers">0</div>
+          <div class="label">总用户数</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" id="adminCount">0</div>
+          <div class="label">管理员</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" id="totalViews">0</div>
+          <div class="label">总浏览次数</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" id="totalPredictions">0</div>
+          <div class="label">总预测次数</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">用户列表</div>
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="搜索用户名、昵称或手机号..." oninput="filterUsers()">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>用户名</th>
+                <th>昵称</th>
+                <th>手机号</th>
+                <th>角色</th>
+                <th>浏览</th>
+                <th>预测</th>
+                <th>注册时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              <tr><td colspan="9" class="loading">加载中...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset Password Modal -->
+  <div class="modal-overlay" id="resetModal">
+    <div class="modal">
+      <h3>重置密码</h3>
+      <div class="form-group">
+        <label>用户：<span id="resetUserLabel"></span></label>
+      </div>
+      <div class="form-group">
+        <label>新密码（至少6位）</label>
+        <input type="password" id="resetPasswordInput" placeholder="请输入新密码">
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="closeResetModal()">取消</button>
+        <button class="btn btn-primary" onclick="confirmResetPassword()">确认重置</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"></script>
+  <script>
+    let allUsers = [];
+    let resetUserId = null;
+
+    function getToken() {
+      return localStorage.getItem('token');
+    }
+
+    function showToast(text, isError) {
+      const toast = document.getElementById('toast');
+      const toastText = document.getElementById('toastText');
+      toastText.textContent = text;
+      toast.className = 'toast' + (isError ? ' error' : '') + ' show';
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    async function checkAdmin() {
+      const token = getToken();
+      if (!token) {
+        document.getElementById('notLoggedIn').style.display = 'block';
+        return false;
+      }
+      try {
+        const res = await axios.get(`${API_BASE_URL}/api/admin/check`, {
+          headers: { 'Authorization': token }
+        });
+        if (res.data.code === 200 && res.data.data && res.data.data.isAdmin) {
+          document.getElementById('adminContent').style.display = 'block';
+          return true;
+        }
+        document.getElementById('notAdmin').style.display = 'block';
+        return false;
+      } catch (e) {
+        document.getElementById('notLoggedIn').style.display = 'block';
+        return false;
+      }
+    }
+
+    async function loadUsers() {
+      const token = getToken();
+      try {
+        const res = await axios.get(`${API_BASE_URL}/api/admin/users`, {
+          headers: { 'Authorization': token }
+        });
+        if (res.data.code === 200) {
+          allUsers = res.data.data || [];
+          renderUsers(allUsers);
+          updateStats(allUsers);
+        } else {
+          showToast(res.data.message || '加载失败', true);
+        }
+      } catch (e) {
+        showToast('加载用户列表失败', true);
+      }
+    }
+
+    function updateStats(users) {
+      document.getElementById('totalUsers').textContent = users.length;
+      const admins = users.filter(u => u.role === 'admin');
+      document.getElementById('adminCount').textContent = admins.length;
+      const totalViews = users.reduce((s, u) => s + (parseInt(u.viewCount) || 0), 0);
+      document.getElementById('totalViews').textContent = totalViews;
+      const totalPredictions = users.reduce((s, u) => s + (parseInt(u.predictionCount) || 0), 0);
+      document.getElementById('totalPredictions').textContent = totalPredictions;
+    }
+
+    function renderUsers(users) {
+      const tbody = document.getElementById('userTableBody');
+      if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="empty">无匹配用户</td></tr>';
+        return;
+      }
+      tbody.innerHTML = users.map(u => {
+        const isAdmin = u.role === 'admin';
+        const badge = isAdmin
+          ? '<span class="admin-badge">ADMIN</span>'
+          : '<span class="user-badge">USER</span>';
+        const created = u.create_time ? new Date(u.create_time).toLocaleDateString('zh-CN') : '-';
+        return `<tr>
+          <td>${u.id}</td>
+          <td><strong>${u.username || '-'}</strong></td>
+          <td>${u.name || '-'}</td>
+          <td>${u.phone || '-'}</td>
+          <td>${badge}</td>
+          <td>${u.viewCount || 0}</td>
+          <td>${u.predictionCount || 0}</td>
+          <td>${created}</td>
+          <td style="white-space:nowrap;">
+            <button class="btn btn-sm ${isAdmin ? 'btn-warning' : 'btn-primary'}" onclick="toggleRole(${u.id}, '${isAdmin ? 'user' : 'admin'}')" style="margin-right:4px;">
+              ${isAdmin ? '取消管理' : '设为管理'}
+            </button>
+            <button class="btn btn-sm btn-secondary" onclick="openResetModal(${u.id}, '${u.username}')" style="margin-right:4px;">重置密码</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id}, '${u.username}')">删除</button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    function filterUsers() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      if (!q) {
+        renderUsers(allUsers);
+        return;
+      }
+      const filtered = allUsers.filter(u =>
+        (u.username && u.username.toLowerCase().includes(q)) ||
+        (u.name && u.name.toLowerCase().includes(q)) ||
+        (u.phone && u.phone.includes(q))
+      );
+      renderUsers(filtered);
+    }
+
+    async function toggleRole(id, newRole) {
+      const token = getToken();
+      const action = newRole === 'admin' ? '设为管理员' : '取消管理员';
+      if (!confirm(`确定${action}该用户吗？`)) return;
+      try {
+        const res = await axios.put(`${API_BASE_URL}/api/admin/user/${id}/role`,
+          { role: newRole },
+          { headers: { 'Authorization': token } }
+        );
+        if (res.data.code === 200) {
+          showToast(res.data.message || '操作成功');
+          await loadUsers();
+        } else {
+          showToast(res.data.message || '操作失败', true);
+        }
+      } catch (e) {
+        showToast('操作失败', true);
+      }
+    }
+
+    function openResetModal(id, username) {
+      resetUserId = id;
+      document.getElementById('resetUserLabel').textContent = username;
+      document.getElementById('resetPasswordInput').value = '';
+      document.getElementById('resetModal').classList.add('show');
+    }
+
+    function closeResetModal() {
+      document.getElementById('resetModal').classList.remove('show');
+      resetUserId = null;
+    }
+
+    async function confirmResetPassword() {
+      const password = document.getElementById('resetPasswordInput').value;
+      if (!password || password.length < 6) {
+        showToast('密码至少6位', true);
+        return;
+      }
+      const token = getToken();
+      try {
+        const res = await axios.post(`${API_BASE_URL}/api/admin/user/reset-password`,
+          { id: resetUserId, password },
+          { headers: { 'Authorization': token } }
+        );
+        if (res.data.code === 200) {
+          showToast('密码已重置');
+          closeResetModal();
+        } else {
+          showToast(res.data.message || '重置失败', true);
+        }
+      } catch (e) {
+        showToast('重置失败', true);
+      }
+    }
+
+    async function deleteUser(id, username) {
+      if (!confirm(`确定要删除用户「${username}」吗？此操作不可恢复！`)) return;
+      const token = getToken();
+      try {
+        const res = await axios.delete(`${API_BASE_URL}/api/admin/user/${id}`, {
+          headers: { 'Authorization': token }
+        });
+        if (res.data.code === 200) {
+          showToast('用户已删除');
+          await loadUsers();
+        } else {
+          showToast(res.data.message || '删除失败', true);
+        }
+      } catch (e) {
+        showToast('删除失败', true);
+      }
+    }
+
+    document.getElementById('resetModal')?.addEventListener('click', (e) => {
+      if (e.target === document.getElementById('resetModal')) closeResetModal();
+    });
+
+    document.getElementById('resetPasswordInput')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') confirmResetPassword();
+    });
+
+    async function init() {
+      const ok = await checkAdmin();
+      if (ok) await loadUsers();
+    }
+
+    init();
+  </script>
+</body>
+</html>

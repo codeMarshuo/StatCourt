@@ -1,4 +1,4 @@
-/* 高端半透明（玻璃拟态）登录/注册 */
+/* 高端半透明（玻璃拟态）登录/注册 - 直角版 */
 :root{
 	--glass: rgba(168, 110, 110, 0.08);
 	--glass-2: rgba(255,255,255,0.06);
@@ -44,7 +44,7 @@ body{
 	isolation:isolate;
 }
 
-/* 细微的“电影颗粒感”与顶部遮罩（不抢人物） */
+/* 细微的"电影颗粒感"与顶部遮罩（不抢人物） */
 .login-page::before{
 	content:"";
 	position:fixed;
@@ -138,7 +138,7 @@ body{
 	align-items:center;
 	gap:8px;
 	padding:8px 14px;
-	border-radius:999px;
+	border-radius:0;
 	background:rgba(0,0,0,0.24);
 	border:1.5px solid rgba(0,212,255,0.18);
 	color:rgba(234,246,251,0.85);
@@ -181,7 +181,7 @@ body{
 	max-width:440px;
 	margin-left:auto;
 	padding:22px 22px 18px;
-	border-radius:18px;
+	border-radius:0;
 	color:var(--text);
 	background:
 		linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
@@ -223,7 +223,7 @@ body{
 	gap:8px;
 	width:100%;
 	padding:6px;
-	border-radius:14px;
+	border-radius:0;
 	background:rgba(0,0,0,0.22);
 	border:1px solid rgba(255,255,255,0.12);
 	box-shadow: var(--shadow-soft);
@@ -235,7 +235,7 @@ body{
 .tab{
 	flex:1;
 	padding:10px 12px;
-	border-radius:10px;
+	border-radius:0;
 	background:transparent;
 	border:1px solid transparent;
 	color:rgba(234,246,251,0.78);
@@ -308,7 +308,7 @@ body{
 .form input{
 	margin-top:8px;
 	padding:12px 12px;
-	border-radius:12px;
+	border-radius:0;
 	border:1px solid rgba(255,255,255,0.14);
 	background: rgba(0,0,0,0.22);
 	color:var(--text);
@@ -333,7 +333,7 @@ body{
 .btn{
 	display:inline-block;
 	padding:12px 16px;
-	border-radius:12px;
+	border-radius:0;
 	text-decoration:none;
 	font-weight:900;
 	letter-spacing:0.2px;

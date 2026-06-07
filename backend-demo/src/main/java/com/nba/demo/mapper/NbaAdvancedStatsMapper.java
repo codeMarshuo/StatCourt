@@ -52,4 +52,10 @@ public interface NbaAdvancedStatsMapper {
             "LEFT JOIN nbaplayerbasicstatistics b ON a.player COLLATE utf8mb4_unicode_ci = b.PlayerName COLLATE utf8mb4_unicode_ci " +
             "WHERE a.id = #{id}")
     NbaAdvancedStats findById(@Param("id") Integer id);
+
+    @Select("SELECT a.*, b.PlayerImage as playerImage, b.PlayerRank as playerRank " +
+            "FROM nba_advanced_stats a " +
+            "LEFT JOIN nbaplayerbasicstatistics b ON a.player COLLATE utf8mb4_unicode_ci = b.PlayerName COLLATE utf8mb4_unicode_ci " +
+            "WHERE a.player = #{playerName} LIMIT 1")
+    NbaAdvancedStats findByPlayerName(@Param("playerName") String playerName);
 }

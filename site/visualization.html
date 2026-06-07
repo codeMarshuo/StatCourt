@@ -26,52 +26,6 @@
       line-height: 1.6;
     }
 
-    .nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      background: rgba(10, 25, 41, 0.8);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .nav-inner {
-      max-width: 1600px;
-      margin: 0 auto;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .brand {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: #00d4ff;
-      letter-spacing: -0.5px;
-      text-decoration: none;
-    }
-
-    .nav-links {
-      display: flex;
-      list-style: none;
-      gap: 2rem;
-    }
-
-    .nav-links a {
-      color: #bcd3df;
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.3s;
-    }
-
-    .nav-links a:hover,
-    .nav-links a.active {
-      color: #00d4ff;
-    }
-
     .section {
       padding: 100px 0 40px;
       min-height: 100vh;
@@ -98,6 +52,37 @@
     .page-subtitle {
       font-size: 1rem;
       color: #9bd1e3;
+    }
+
+    .section-divider {
+      margin: 3rem 0;
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.3), transparent);
+    }
+
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .section-title::before,
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.5));
+    }
+
+    .section-title::after {
+      background: linear-gradient(90deg, rgba(0, 212, 255, 0.5), transparent);
     }
 
     .charts-grid {
@@ -147,6 +132,109 @@
       height: 500px;
     }
 
+    .team-radar-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .team-radar-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 1rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .team-radar-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0, 212, 255, 0.3);
+      box-shadow: 0 8px 30px rgba(0, 212, 255, 0.15);
+    }
+
+    .team-radar-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .team-logo-small {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      object-fit: contain;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px;
+    }
+
+    .team-info-small {
+      flex: 1;
+    }
+
+    .team-name-small {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .team-record-small {
+      font-size: 0.65rem;
+      color: #9bd1e3;
+    }
+
+    .team-radar-chart {
+      width: 100%;
+      height: 180px;
+    }
+
+    .team-stats-mini {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.25rem;
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .stat-mini {
+      text-align: center;
+    }
+
+    .stat-mini-value {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #00d4ff;
+    }
+
+    .stat-mini-label {
+      font-size: 0.55rem;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+
+    .conference-section {
+      margin-bottom: 2rem;
+    }
+
+    .conference-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #00d4ff;
+      margin-bottom: 1rem;
+      padding-left: 0.75rem;
+      border-left: 3px solid #00d4ff;
+    }
+
     .footer {
       background: rgba(10, 25, 41, 0.8);
       backdrop-filter: blur(20px);
@@ -157,9 +245,25 @@
       border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
+    @media (max-width: 1400px) {
+      .team-radar-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
     @media (max-width: 1200px) {
       .charts-grid {
         grid-template-columns: 1fr;
+      }
+
+      .team-radar-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .team-radar-grid {
+        grid-template-columns: repeat(3, 1fr);
       }
     }
 
@@ -175,28 +279,25 @@
       .chart-container.large {
         height: 400px;
       }
+
+      .team-radar-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .team-radar-chart {
+        height: 120px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .team-radar-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="./index.html" class="brand">StatCourt</a>
-      <ul class="nav-links">
-        <li><a href="./index.html">首页</a></li>
-        <li><a href="./data.html">数据</a></li>
-        <li><a href="./teams.html">球队</a></li>
-        <li><a href="./visualization.html" class="active">可视化</a></li>
-        <li><a href="./chat.html">AI助手</a></li>
-        <li><a href="./advanced.html">高阶数据</a></li>
-        <li><a href="./compare.html">对比</a></li>
-        <li><a href="./demo.html">3D展示</a></li>
-        <li><a href="./demo-advanced.html">3D高阶</a></li>
-        <li><a href="./map.html">球队地图</a></li>
-        <li><a href="./match.html">比赛模拟</a></li>
-      </ul>
-    </div>
-  </nav>
+  <script src="./js/nav.js"></script>
 
   <section class="section">
     <div class="container">
@@ -236,6 +337,20 @@
           <div id="teamRadarChart" class="chart-container"></div>
         </div>
       </div>
+
+      <hr class="section-divider">
+
+      <h2 class="section-title">球队综合能力雷达图</h2>
+
+      <div class="conference-section">
+        <div class="conference-title">东部联盟</div>
+        <div class="team-radar-grid" id="eastTeamRadarGrid"></div>
+      </div>
+
+      <div class="conference-section">
+        <div class="conference-title">西部联盟</div>
+        <div class="team-radar-grid" id="westTeamRadarGrid"></div>
+      </div>
     </div>
   </section>
 
@@ -246,8 +361,44 @@
   </footer>
 
   <script>
-    const API_BASE_URL = 'http://localhost:8081';
     let nbaData = {};
+    let teamRadarCharts = [];
+
+    const TEAM_COLORS = {
+      'ATL': '#E03A3E',
+      'BOS': '#007A33',
+      'BKN': '#000000',
+      'CHA': '#1D1160',
+      'CHI': '#CE1141',
+      'CLE': '#860038',
+      'DAL': '#00538C',
+      'DEN': '#0E2240',
+      'DET': '#C8102E',
+      'GSW': '#1D428A',
+      'HOU': '#CE1141',
+      'IND': '#002D62',
+      'LAC': '#C8102E',
+      'LAL': '#552583',
+      'MEM': '#5D76A9',
+      'MIA': '#98002E',
+      'MIL': '#00471B',
+      'MIN': '#0C2340',
+      'NOP': '#0C2340',
+      'NYK': '#F58426',
+      'OKC': '#007AC1',
+      'ORL': '#0077C0',
+      'PHI': '#006BB6',
+      'PHX': '#1D1160',
+      'POR': '#E03A3E',
+      'SAC': '#5A2D81',
+      'SAS': '#C4CED4',
+      'TOR': '#CE1141',
+      'UTA': '#002B5C',
+      'WAS': '#002B5C'
+    };
+
+    const EAST_TEAMS = ['BOS', 'BKN', 'NYK', 'PHI', 'TOR', 'CHI', 'CLE', 'DET', 'IND', 'MIL', 'ATL', 'CHA', 'MIA', 'ORL', 'WAS'];
+    const WEST_TEAMS = ['DEN', 'MIN', 'OKC', 'POR', 'UTA', 'GSW', 'LAC', 'LAL', 'PHX', 'SAC', 'DAL', 'HOU', 'MEM', 'NOP', 'SAS'];
 
     async function loadData() {
       try {
@@ -261,6 +412,7 @@
         if (res && (res.code === 200 || res.code === 0)) {
           nbaData = res.data || {};
           initAllCharts();
+          initTeamRadarGrids();
         }
       } catch (error) {
         console.error('加载数据失败:', error);
@@ -515,8 +667,17 @@
         const pctStr = player.threePointShootingPer || player.ThreePointShootingPer || '0%';
         const pct = parseFloat(pctStr.replace('%', '')) || 0;
         const name = player.playerName || player.PlayerName || '未知';
+        const team = player.team || player.Team || '';
+        const image = player.playerImage || player.PlayerImage || '';
         
-        const dataPoint = [made, pct, name, player.team || player.Team || ''];
+        const dataPoint = {
+          value: [made, pct],
+          name: name,
+          team: team,
+          image: image,
+          made: made,
+          pct: pct
+        };
 
         if (player === maxMadePlayer || player === maxPctPlayer) {
           rippleData.push(dataPoint);
@@ -541,15 +702,26 @@
         tooltip: {
           trigger: 'item',
           formatter: function(params) {
-            const data = params.data;
-            const label = params.seriesName === '最高产量/命中率球员' ? '⭐ ' : '';
-            return `${label}${data[2]}<br/>球队: ${data[3]}<br/>三分命中数: ${data[0]}<br/>三分命中率: ${data[1]}%`;
+            const d = params.data;
+            const isTop = params.seriesName === '最高产量/命中率球员';
+            const star = isTop ? '⭐ ' : '';
+            const imgHtml = d.image ? `<img src="${d.image}" style="width:60px;height:45px;border-radius:8px;object-fit:cover;margin-bottom:8px;border:2px solid #00d4ff;" onerror="this.style.display='none'"/>` : '';
+            return `<div style="text-align:center;">
+              ${imgHtml}
+              <div style="font-weight:600;font-size:14px;margin-bottom:4px;">${star}${d.name}</div>
+              <div style="color:#9bd1e3;font-size:12px;">${d.team}</div>
+              <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,212,255,0.3);">
+                <span style="color:#00d4ff;">三分命中:</span> <b>${d.made}</b> 个<br/>
+                <span style="color:#00d4ff;">命中率:</span> <b>${d.pct}%</b>
+              </div>
+            </div>`;
           },
-          backgroundColor: 'rgba(0, 20, 40, 0.95)',
+          backgroundColor: 'rgba(10, 25, 41, 0.95)',
           borderColor: '#00d4ff',
           borderWidth: 2,
           textStyle: { color: '#fff', fontSize: 14 },
-          padding: [15, 20]
+          padding: [12, 16],
+          extraCssText: 'box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);border-radius:12px;'
         },
         legend: {
           data: ['普通球员', '最高产量/命中率球员'],
@@ -593,8 +765,8 @@
           {
             name: '普通球员',
             type: 'scatter',
-            symbolSize: function(data) {
-              return Math.sqrt(data[0]) * 1.5 + 8;
+            symbolSize: function(val, params) {
+              return Math.sqrt(params.data.made) * 1.5 + 8;
             },
             data: normalData,
             itemStyle: {
@@ -613,14 +785,14 @@
                 borderColor: '#fff',
                 borderWidth: 2
               },
-              scale: 1.3
+              scale: 1.5
             }
           },
           {
             name: '最高产量/命中率球员',
             type: 'effectScatter',
-            symbolSize: function(data) {
-              return Math.sqrt(data[0]) * 1.5 + 12;
+            symbolSize: function(val, params) {
+              return Math.sqrt(params.data.made) * 1.5 + 12;
             },
             data: rippleData,
             rippleEffect: {
@@ -644,7 +816,7 @@
                 borderColor: '#fff',
                 borderWidth: 3
               },
-              scale: 1.4
+              scale: 1.5
             }
           }
         ]
@@ -814,6 +986,206 @@
 
       chart.setOption(option);
       window.addEventListener('resize', () => chart.resize());
+    }
+
+    function getTeamCode(teamName) {
+      if (!teamName) return null;
+      const name = teamName.toLowerCase();
+      const codeMap = {
+        '凯尔特人': 'BOS', 'celtics': 'BOS', 'boston': 'BOS',
+        '篮网': 'BKN', 'nets': 'BKN', 'brooklyn': 'BKN',
+        '太阳': 'PHX', 'suns': 'PHX', 'phoenix': 'PHX',
+        '尼克斯': 'NYK', 'knicks': 'NYK', 'new york': 'NYK',
+        '76人': 'PHI', '76ers': 'PHI', 'sixers': 'PHI', 'philadelphia': 'PHI',
+        '猛龙': 'TOR', 'raptors': 'TOR', 'toronto': 'TOR',
+        '公牛': 'CHI', 'bulls': 'CHI', 'chicago': 'CHI',
+        '骑士': 'CLE', 'cavaliers': 'CLE', 'cavs': 'CLE', 'cleveland': 'CLE',
+        '活塞': 'DET', 'pistons': 'DET', 'detroit': 'DET',
+        '步行者': 'IND', 'pacers': 'IND', 'indiana': 'IND',
+        '雄鹿': 'MIL', 'bucks': 'MIL', 'milwaukee': 'MIL',
+        '老鹰': 'ATL', 'hawks': 'ATL', 'atlanta': 'ATL',
+        '黄蜂': 'CHA', 'hornets': 'CHA', 'charlotte': 'CHA',
+        '热火': 'MIA', 'heat': 'MIA', 'miami': 'MIA',
+        '魔术': 'ORL', 'magic': 'ORL', 'orlando': 'ORL',
+        '奇才': 'WAS', 'wizards': 'WAS', 'washington': 'WAS',
+        '掘金': 'DEN', 'nuggets': 'DEN', 'denver': 'DEN',
+        '森林狼': 'MIN', 'timberwolves': 'MIN', 'wolves': 'MIN', 'minnesota': 'MIN',
+        '雷霆': 'OKC', 'thunder': 'OKC', 'oklahoma': 'OKC',
+        '开拓者': 'POR', 'blazers': 'POR', 'portland': 'POR', 'trail blazers': 'POR',
+        '爵士': 'UTA', 'jazz': 'UTA', 'utah': 'UTA',
+        '勇士': 'GSW', 'warriors': 'GSW', 'golden state': 'GSW',
+        '快船': 'LAC', 'clippers': 'LAC', 'la clippers': 'LAC',
+        '湖人': 'LAL', 'lakers': 'LAL', 'la lakers': 'LAL', 'los angeles lakers': 'LAL',
+        '国王': 'SAC', 'kings': 'SAC', 'sacramento': 'SAC',
+        '独行侠': 'DAL', 'mavericks': 'DAL', 'dallas': 'DAL',
+        '火箭': 'HOU', 'rockets': 'HOU', 'houston': 'HOU',
+        '灰熊': 'MEM', 'grizzlies': 'MEM', 'memphis': 'MEM',
+        '鹈鹕': 'NOP', 'pelicans': 'NOP', 'new orleans': 'NOP',
+        '马刺': 'SAS', 'spurs': 'SAS', 'san antonio': 'SAS'
+      };
+      
+      for (const [key, code] of Object.entries(codeMap)) {
+        if (name.includes(key)) return code;
+      }
+      return null;
+    }
+
+    function createTeamRadarCard(team, container) {
+      const teamCode = getTeamCode(team.teamname || team.Team);
+      const teamColor = teamCode ? TEAM_COLORS[teamCode] : '#00d4ff';
+      
+      const card = document.createElement('div');
+      card.className = 'team-radar-card';
+      
+      const teamShortName = (team.teamname || team.Team || '未知').split(' ').pop();
+      const wins = team.win || 0;
+      const losses = team.lose || 0;
+      const winperStr = team.winper || '0%';
+      const winrate = parseFloat(winperStr.replace('%', '')) / 100 || 0;
+      
+      const score = team.score || team.Score || 0;
+      const rebound = team.rebound || team.Rebound || 0;
+      const assist = team.assist || team.Assist || 0;
+      const steal = team.steal || team.Steal || 0;
+      const block = team.block || team.Block || 0;
+      
+      card.innerHTML = `
+        <div class="team-radar-header">
+          <img class="team-logo-small" src="./assets/teamLogo/${teamCode}_logo.png" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><circle cx=%2220%22 cy=%2220%22 r=%2218%22 fill=%22%23333%22/><text x=%2220%22 y=%2226%22 text-anchor=%22middle%22 fill=%22%23fff%22 font-size=%2212%22>${teamShortName.substring(0,3)}</text></svg>'" alt="${teamShortName}">
+          <div class="team-info-small">
+            <div class="team-name-small">${teamShortName}</div>
+            <div class="team-record-small">${wins}-${losses} (${(winrate * 100).toFixed(1)}%)</div>
+          </div>
+        </div>
+        <div class="team-radar-chart" id="radar-${teamCode || Math.random().toString(36).substr(2, 9)}"></div>
+        <div class="team-stats-mini">
+          <div class="stat-mini">
+            <div class="stat-mini-value">${score.toFixed(1)}</div>
+            <div class="stat-mini-label">得分</div>
+          </div>
+          <div class="stat-mini">
+            <div class="stat-mini-value">${rebound.toFixed(1)}</div>
+            <div class="stat-mini-label">篮板</div>
+          </div>
+          <div class="stat-mini">
+            <div class="stat-mini-value">${assist.toFixed(1)}</div>
+            <div class="stat-mini-label">助攻</div>
+          </div>
+        </div>
+      `;
+      
+      container.appendChild(card);
+      
+      const chartDom = card.querySelector('.team-radar-chart');
+      const chart = echarts.init(chartDom);
+      teamRadarCharts.push(chart);
+      
+      const option = {
+        backgroundColor: 'transparent',
+        radar: {
+          indicator: [
+            { name: '得分', max: 130 },
+            { name: '篮板', max: 50 },
+            { name: '助攻', max: 35 },
+            { name: '抢断', max: 12 },
+            { name: '盖帽', max: 8 }
+          ],
+          shape: 'polygon',
+          splitNumber: 5,
+          center: ['50%', '55%'],
+          radius: '70%',
+          name: {
+            show: true,
+            textStyle: {
+              color: '#9bd1e3',
+              fontSize: 10,
+              fontWeight: 500
+            },
+            formatter: function(value) {
+              return value;
+            }
+          },
+          splitLine: { 
+            lineStyle: { 
+              color: 'rgba(0, 212, 255, 0.3)',
+              width: 1
+            }
+          },
+          splitArea: {
+            show: true,
+            areaStyle: { 
+              color: [
+                'rgba(0, 212, 255, 0.02)',
+                'rgba(0, 212, 255, 0.05)',
+                'rgba(0, 212, 255, 0.08)',
+                'rgba(0, 212, 255, 0.11)',
+                'rgba(0, 212, 255, 0.14)'
+              ]
+            }
+          },
+          axisLine: { 
+            lineStyle: { 
+              color: 'rgba(0, 212, 255, 0.4)',
+              width: 1
+            }
+          }
+        },
+        series: [{
+          type: 'radar',
+          data: [{
+            value: [
+              score,
+              rebound,
+              assist,
+              steal,
+              block
+            ],
+            symbol: 'circle',
+            symbolSize: 4,
+            lineStyle: {
+              width: 2,
+              color: teamColor
+            },
+            areaStyle: {
+              color: new echarts.graphic.RadialGradient(0.5, 0.5, 1, [
+                { offset: 0, color: teamColor + 'cc' },
+                { offset: 1, color: teamColor + '40' }
+              ])
+            },
+            itemStyle: {
+              color: teamColor,
+              borderColor: '#fff',
+              borderWidth: 1
+            }
+          }]
+        }]
+      };
+      
+      chart.setOption(option);
+    }
+
+    function initTeamRadarGrids() {
+      if (!nbaData.teams || nbaData.teams.length === 0) return;
+
+      const eastContainer = document.getElementById('eastTeamRadarGrid');
+      const westContainer = document.getElementById('westTeamRadarGrid');
+      
+      eastContainer.innerHTML = '';
+      westContainer.innerHTML = '';
+
+      nbaData.teams.forEach(team => {
+        const teamCode = getTeamCode(team.teamname || team.Team);
+        
+        if (EAST_TEAMS.includes(teamCode)) {
+          createTeamRadarCard(team, eastContainer);
+        } else if (WEST_TEAMS.includes(teamCode)) {
+          createTeamRadarCard(team, westContainer);
+        }
+      });
+
+      window.addEventListener('resize', () => {
+        teamRadarCharts.forEach(chart => chart.resize());
+      });
     }
 
     loadData();

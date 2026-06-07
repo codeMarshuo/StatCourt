@@ -7,52 +7,82 @@ import java.time.LocalDateTime;
 @Data
 public class Team {
     private Integer teamid;
-    
-    @JsonProperty("teamrank")
     private Integer teamrank;
-    
-    @JsonProperty("teamimage")
     private String teamimage;
     
-    @JsonProperty("Team")
     private String Team;
     
-    @JsonProperty("NumberOfMatches")
-    private Integer NumberOfMatches;
+    private Integer numberofmatches;
     
-    @JsonProperty("win")
     private Integer win;
     
-    @JsonProperty("lose")
     private Integer lose;
     
-    @JsonProperty("winper")
     private String winper;
     
-    @JsonProperty("Score")
-    private Float Score;
+    private Double Score;
     
-    @JsonProperty("Rebound")
-    private Float Rebound;
+    private Double Rebound;
     
-    @JsonProperty("Assist")
-    private Float Assist;
+    private Double Assist;
     
-    @JsonProperty("Steal")
-    private Float Steal;
+    private Double Steal;
     
-    @JsonProperty("Block")
-    private Float Block;
+    private Double Block;
     
-    @JsonProperty("FieldGoalPer")
     private String FieldGoalPer;
     
-    @JsonProperty("ThreePointShootingPer")
     private String ThreePointShootingPer;
     
-    @JsonProperty("FreeThrowShootingPer")
     private String FreeThrowShootingPer;
     
     private LocalDateTime entry_time;
     private LocalDateTime update_time;
+    
+    public String getTeamname() {
+        return Team;
+    }
+    
+    public String getWinper() {
+        return winper;
+    }
+    
+    public Double getScore() {
+        return Score != null ? Score : 0.0;
+    }
+    
+    public Double getRebound() {
+        return Rebound != null ? Rebound : 0.0;
+    }
+    
+    public Double getAssist() {
+        return Assist != null ? Assist : 0.0;
+    }
+    
+    public Double getSteal() {
+        return Steal != null ? Steal : 0.0;
+    }
+    
+    public Double getBlock() {
+        return Block != null ? Block : 0.0;
+    }
+    
+    public Integer getWin() {
+        return win != null ? win : 0;
+    }
+    
+    public Integer getLose() {
+        return lose != null ? lose : 0;
+    }
+    
+    public Double getWinRate() {
+        if (winper != null && winper.contains("%")) {
+            try {
+                return Double.parseDouble(winper.replace("%", "")) / 100;
+            } catch (NumberFormatException e) {
+                return 0.0;
+            }
+        }
+        return 0.0;
+    }
 }

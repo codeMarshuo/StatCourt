@@ -115,85 +115,7 @@
       100% { transform: translate(60px, 60px); }
     }
 
-    .nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      background: rgba(10, 15, 26, 0.8);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .nav-inner {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 24px;
-      height: 64px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .brand {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      text-decoration: none;
-      letter-spacing: -0.02em;
-      transition: all 0.3s ease;
-    }
-
-    .brand:hover {
-      text-shadow: 0 0 20px var(--accent-glow);
-    }
-
-    .brand span {
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .nav-links {
-      display: flex;
-      list-style: none;
-      gap: 32px;
-    }
-
-    .nav-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 0.875rem;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-
-    .nav-links a::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      transition: width 0.3s ease;
-    }
-
-    .nav-links a:hover,
-    .nav-links a.active {
-      color: var(--text-primary);
-    }
-
-    .nav-links a:hover::after,
-    .nav-links a.active::after {
-      width: 100%;
-    }
-
-    .main {
+    .compare-main {
       padding: 96px 24px 48px;
       max-width: 1400px;
       margin: 0 auto;
@@ -786,24 +708,7 @@
     <div class="bg-orb"></div>
   </div>
 
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="./index.html" class="brand">Stat<span>Court</span></a>
-      <ul class="nav-links">
-        <li><a href="./index.html">首页</a></li>
-        <li><a href="./data.html">数据</a></li>
-        <li><a href="./teams.html">球队</a></li>
-        <li><a href="./visualization.html">可视化</a></li>
-        <li><a href="./chat.html">AI助手</a></li>
-        <li><a href="./advanced.html">高阶数据</a></li>
-        <li><a href="./compare.html" class="active">对比</a></li>
-        <li><a href="./demo.html">3D展示</a></li>
-        <li><a href="./demo-advanced.html">3D高阶</a></li>
-        <li><a href="./map.html">球队地图</a></li>
-        <li><a href="./match.html">比赛模拟</a></li>
-      </ul>
-    </div>
-  </nav>
+  <script src="./js/nav.js"></script>
 
   <main class="main">
     <div class="header">
@@ -954,7 +859,6 @@
   </footer>
 
   <script>
-    const API_BASE_URL = 'http://localhost:8081';
     const AI_CONFIG = {
       endpoint: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
       apiKey: 'd094c09c2c7e47e2b4eba1f9a53a77b7.3fdg6FlIawgBcUEA',

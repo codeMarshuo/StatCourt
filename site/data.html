@@ -9,6 +9,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -24,6 +28,8 @@
       --accent: #8b5cf6;
       --accent-light: #a78bfa;
       --accent-glow: rgba(139, 92, 246, 0.3);
+      --accent-cyan: #06b6d4;
+      --accent-cyan-light: #22d3ee;
       --text-primary: #f4f4f5;
       --text-secondary: #a1a1aa;
       --text-muted: #71717a;
@@ -114,85 +120,6 @@
     @keyframes gridMove {
       0% { transform: translate(0, 0); }
       100% { transform: translate(60px, 60px); }
-    }
-
-    .nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      background: rgba(10, 10, 15, 0.7);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .nav-inner {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 24px;
-      height: 64px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .brand {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      text-decoration: none;
-      letter-spacing: -0.02em;
-      transition: all 0.3s ease;
-    }
-
-    .brand:hover {
-      text-shadow: 0 0 20px var(--accent-glow);
-    }
-
-    .brand span {
-      background: linear-gradient(135deg, var(--accent) 0%, #ec4899 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .nav-links {
-      display: flex;
-      list-style: none;
-      gap: 32px;
-    }
-
-    .nav-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 0.875rem;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-
-    .nav-links a::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--accent), #ec4899);
-      transition: width 0.3s ease;
-      border-radius: 1px;
-    }
-
-    .nav-links a:hover,
-    .nav-links a.active {
-      color: var(--text-primary);
-    }
-
-    .nav-links a:hover::after,
-    .nav-links a.active::after {
-      width: 100%;
     }
 
     .main {
@@ -570,12 +497,563 @@
       backdrop-filter: blur(10px);
     }
 
+    .ai-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+    }
+
+    .ai-fab-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent) 100%);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.4);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .ai-fab-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 30px rgba(6, 182, 212, 0.5);
+    }
+
+    .ai-fab-btn.active {
+      background: linear-gradient(135deg, var(--accent) 0%, #ec4899 100%);
+      box-shadow: 0 6px 30px rgba(139, 92, 246, 0.5);
+    }
+
+    .ai-fab-btn svg {
+      width: 24px;
+      height: 24px;
+      color: white;
+      transition: transform 0.3s ease;
+    }
+
+    .ai-fab-btn.active svg {
+      transform: rotate(45deg);
+    }
+
+    .ai-fab-pulse {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      animation: pulse 2s ease-out infinite;
+      opacity: 0;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.5; }
+      100% { transform: scale(1.8); opacity: 0; }
+    }
+
+    .ai-panel {
+      position: fixed;
+      bottom: 96px;
+      right: 24px;
+      width: 380px;
+      max-width: calc(100vw - 48px);
+      max-height: 70vh;
+      background: rgba(15, 15, 25, 0.98);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+      z-index: 998;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px) scale(0.95);
+      transition: all 0.3s ease;
+    }
+
+    .ai-panel.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+
+    .ai-panel-header {
+      padding: 16px 20px;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ai-panel-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent) 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .ai-panel-title {
+      flex: 1;
+    }
+
+    .ai-panel-title h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .ai-panel-title p {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .ai-panel-close {
+      width: 28px;
+      height: 28px;
+      background: rgba(255, 255, 255, 0.05);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+    }
+
+    .ai-panel-close:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+
+    .ai-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 200px;
+      max-height: 400px;
+    }
+
+    .ai-messages::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .ai-messages::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+
+    .ai-welcome {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-secondary);
+    }
+
+    .ai-welcome-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .ai-welcome h4 {
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .ai-welcome p {
+      font-size: 0.75rem;
+    }
+
+    .ai-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+      justify-content: center;
+    }
+
+    .ai-suggestion-btn {
+      padding: 6px 10px;
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 12px;
+      color: var(--accent-cyan-light);
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .ai-suggestion-btn:hover {
+      background: rgba(6, 182, 212, 0.2);
+    }
+
+    .ai-message {
+      display: flex;
+      gap: 8px;
+      animation: messageSlide 0.3s ease-out;
+    }
+
+    @keyframes messageSlide {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .ai-message.user {
+      flex-direction: row-reverse;
+    }
+
+    .ai-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .ai-message.user .ai-avatar {
+      background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-cyan-light) 100%);
+    }
+
+    .ai-message.assistant .ai-avatar {
+      background: linear-gradient(135deg, var(--accent) 0%, #ec4899 100%);
+    }
+
+    .ai-bubble {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    .ai-message.user .ai-bubble {
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 12px 12px 4px 12px;
+    }
+
+    .ai-message.assistant .ai-bubble {
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: 12px 12px 12px 4px;
+    }
+
+    .ai-bubble p {
+      margin-bottom: 8px;
+    }
+
+    .ai-bubble p:last-child {
+      margin-bottom: 0;
+    }
+
+    .ai-bubble h1,
+    .ai-bubble h2,
+    .ai-bubble h3,
+    .ai-bubble h4 {
+      margin: 12px 0 6px 0;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .ai-bubble h1 { font-size: 1.1em; }
+    .ai-bubble h2 { font-size: 1em; }
+    .ai-bubble h3 { font-size: 0.95em; }
+    .ai-bubble h4 { font-size: 0.9em; }
+
+    .ai-bubble h1:first-child,
+    .ai-bubble h2:first-child,
+    .ai-bubble h3:first-child {
+      margin-top: 0;
+    }
+
+    .ai-bubble ul,
+    .ai-bubble ol {
+      margin: 8px 0;
+      padding-left: 18px;
+    }
+
+    .ai-bubble li {
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+
+    .ai-bubble ul li::marker {
+      color: var(--accent-cyan);
+    }
+
+    .ai-bubble ol li::marker {
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    .ai-bubble code {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      color: var(--accent-cyan-light);
+    }
+
+    .ai-bubble pre {
+      margin: 10px 0;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .ai-bubble pre code {
+      display: block;
+      padding: 12px 14px;
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      border: none;
+    }
+
+    .ai-bubble blockquote {
+      margin: 10px 0;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border-left: 3px solid var(--accent-cyan);
+      color: var(--text-secondary);
+      font-size: 0.9em;
+      border-radius: 0 6px 6px 0;
+    }
+
+    .ai-bubble table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 0.75rem;
+    }
+
+    .ai-bubble th,
+    .ai-bubble td {
+      padding: 6px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ai-bubble th {
+      background: rgba(0, 0, 0, 0.3);
+      color: var(--accent-cyan-light);
+      font-weight: 600;
+    }
+
+    .ai-bubble tr:hover td {
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .ai-bubble hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 12px 0;
+    }
+
+    .ai-bubble a {
+      color: var(--accent-cyan-light);
+      text-decoration: none;
+    }
+
+    .ai-bubble a:hover {
+      text-decoration: underline;
+    }
+
+    .ai-bubble strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .ai-bubble em {
+      color: var(--text-secondary);
+    }
+
+    .ai-bubble .searching-indicator {
+      padding: 8px 12px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 6px;
+      margin-bottom: 10px;
+      color: #10b981;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ai-bubble .searching-indicator::before {
+      content: '🔍';
+    }
+
+    .ai-chart-container {
+      margin-top: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .ai-chart-container canvas {
+      max-height: 200px;
+    }
+
+    .ai-input-area {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ai-options {
+      display: flex;
+      gap: 8px;
+      padding-bottom: 4px;
+    }
+
+    .ai-web-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 16px;
+      color: #10b981;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .ai-web-toggle:hover {
+      background: rgba(16, 185, 129, 0.2);
+    }
+
+    .ai-web-toggle.active {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: #10b981;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+    }
+
+    .ai-web-toggle svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .ai-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .ai-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      resize: none;
+      outline: none;
+      transition: all 0.2s ease;
+      min-height: 38px;
+      max-height: 80px;
+    }
+
+    .ai-input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.1);
+    }
+
+    .ai-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .ai-send-btn {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent) 100%);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .ai-send-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+    }
+
+    .ai-send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .ai-typing {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 0;
+    }
+
+    .ai-typing span {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: typing 1.4s infinite ease-in-out;
+    }
+
+    .ai-typing span:nth-child(2) { animation-delay: 0.2s; }
+    .ai-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+      0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+      40% { transform: scale(1.2); opacity: 1; }
+    }
+
     @media (max-width: 768px) {
       .nav-links { display: none; }
       .controls { flex-direction: column; align-items: stretch; }
       .search-box { min-width: auto; }
       .tab-nav { justify-content: center; }
       .bg-orb { opacity: 0.3; }
+      .ai-panel {
+        right: 12px;
+        left: 12px;
+        width: auto;
+        bottom: 84px;
+        max-height: 60vh;
+      }
+      .ai-fab {
+        bottom: 16px;
+        right: 16px;
+      }
     }
   </style>
 </head>
@@ -587,24 +1065,7 @@
     <div class="bg-orb"></div>
   </div>
 
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="./index.html" class="brand">Stat<span>Court</span></a>
-      <ul class="nav-links">
-        <li><a href="./index.html">首页</a></li>
-        <li><a href="./data.html" class="active">数据</a></li>
-        <li><a href="./teams.html">球队</a></li>
-        <li><a href="./visualization.html">可视化</a></li>
-        <li><a href="./chat.html">AI助手</a></li>
-        <li><a href="./advanced.html">高阶数据</a></li>
-        <li><a href="./compare.html">对比</a></li>
-        <li><a href="./demo.html">3D展示</a></li>
-        <li><a href="./demo-advanced.html">3D高阶</a></li>
-        <li><a href="./map.html">球队地图</a></li>
-        <li><a href="./match.html">比赛模拟</a></li>
-      </ul>
-    </div>
-  </nav>
+  <script src="./js/nav.js"></script>
 
   <main class="main">
     <div class="header">
@@ -719,14 +1180,111 @@
     </div>
   </main>
 
+  <div class="ai-fab">
+    <div class="ai-panel" id="aiPanel">
+      <div class="ai-panel-header">
+        <div class="ai-panel-icon">🤖</div>
+        <div class="ai-panel-title">
+          <h3>数据AI助手</h3>
+          <p>询问数据，生成图表分析</p>
+        </div>
+        <button class="ai-panel-close" onclick="toggleAIPanel()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="ai-messages" id="aiMessages">
+        <div class="ai-welcome">
+          <div class="ai-welcome-icon">📊</div>
+          <h4>您好！我是数据AI助手</h4>
+          <p>已接入大模型，可智能分析数据、生成图表</p>
+          <div class="ai-suggestions">
+            <button class="ai-suggestion-btn" onclick="sendAIQuestion('分析得分榜前10球员的表现')">分析得分榜</button>
+            <button class="ai-suggestion-btn" onclick="sendAIQuestion('比较东西部球队的实力')">东西部对比</button>
+            <button class="ai-suggestion-btn" onclick="sendAIQuestion('预测本赛季MVP热门人选')">MVP预测</button>
+          </div>
+        </div>
+      </div>
+      <div class="ai-input-area">
+        <div class="ai-options">
+          <button class="ai-web-toggle" id="aiWebToggle" onclick="toggleAIWebSearch()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            联网搜索
+          </button>
+        </div>
+        <div class="ai-input-row">
+          <textarea class="ai-input" id="aiInput" placeholder="输入问题，如：得分榜前10..." rows="1" onkeydown="handleAIKeydown(event)"></textarea>
+          <button class="ai-send-btn" id="aiSendBtn" onclick="sendAIMessage()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <button class="ai-fab-btn" id="aiFabBtn" onclick="toggleAIPanel()">
+      <div class="ai-fab-pulse"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+  </div>
+
   <footer class="footer">
     Copyright ©2026 StatCourt · NBA数据球场
   </footer>
 
   <script>
-    const API_BASE_URL = 'http://localhost:8081';
     let allPlayers = [];
     let allTeams = [];
+    let aiChartInstance = null;
+    let chartIdCounter = 0;
+    let conversationHistory = [];
+    let webSearchEnabled = true;
+    let currentStreamingChartId = null;
+
+    marked.setOptions({
+      breaks: true,
+      gfm: true,
+      headerIds: false,
+      mangle: false,
+      highlight: function(code, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+          return hljs.highlight(code, { language: lang }).value;
+        }
+        return hljs.highlightAuto(code).value;
+      }
+    });
+
+    function highlightCodeInElement(element) {
+      const blocks = element.querySelectorAll('pre code');
+      blocks.forEach(block => {
+        hljs.highlightElement(block);
+      });
+    }
+
+    function toggleAIWebSearch() {
+      webSearchEnabled = !webSearchEnabled;
+      const toggle = document.getElementById('aiWebToggle');
+      if (webSearchEnabled) {
+        toggle.classList.add('active');
+      } else {
+        toggle.classList.remove('active');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const toggle = document.getElementById('aiWebToggle');
+      if (toggle && webSearchEnabled) {
+        toggle.classList.add('active');
+      }
+    });
 
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -753,7 +1311,7 @@
         renderPlayers(filtered);
       } else {
         const filtered = allTeams.filter(t => 
-          (t.Team || '').toLowerCase().includes(keyword)
+          (t.teamname || t.Team || t.team || '').toLowerCase().includes(keyword)
         );
         renderTeams(filtered);
       }
@@ -847,27 +1405,42 @@
       let html = '';
       teams.forEach((team, index) => {
         const rank = index + 1;
-        const logoHtml = team.teamimage 
-          ? `<img src="${team.teamimage}" alt="${team.Team}" class="team-logo">`
-          : `<div class="player-avatar">${(team.Team || '?').charAt(0)}</div>`;
+        const teamImage = team.teamimage || team.teamImage || '';
+        const teamName = team.teamname || team.Team || team.team || '-';
+        const logoHtml = teamImage 
+          ? `<img src="${teamImage}" alt="${teamName}" class="team-logo">`
+          : `<div class="player-avatar">${teamName.charAt(0)}</div>`;
+        
+        const numberOfMatches = team.numberofmatches || team.NumberOfMatches || '-';
+        const win = team.win || team.Win || '-';
+        const lose = team.lose || team.Lose || '-';
+        const winper = team.winper || team.Winper || '-';
+        const score = team.score || team.Score || '-';
+        const rebound = team.rebound || team.Rebound || '-';
+        const assist = team.assist || team.Assist || '-';
+        const steal = team.steal || team.Steal || '-';
+        const block = team.block || team.Block || '-';
+        const fieldGoalPer = team.fieldGoalPer || team.FieldGoalPer || '-';
+        const threePointPer = team.threePointShootingPer || team.ThreePointShootingPer || '-';
+        const freeThrowPer = team.freeThrowShootingPer || team.FreeThrowShootingPer || '-';
 
         html += `
           <tr style="animation: fadeInUp 0.4s ease-out ${index * 0.02}s both;">
             <td><span class="rank">${rank}</span></td>
             <td>${logoHtml}</td>
-            <td class="player-name">${team.Team || '-'}</td>
-            <td>${team.NumberOfMatches || '-'}</td>
-            <td class="stat-good">${team.win || '-'}</td>
-            <td class="stat-bad">${team.lose || '-'}</td>
-            <td class="stat-highlight">${team.winper || '-'}</td>
-            <td>${team.Score || '-'}</td>
-            <td>${team.Rebound || '-'}</td>
-            <td>${team.Assist || '-'}</td>
-            <td>${team.Steal || '-'}</td>
-            <td>${team.Block || '-'}</td>
-            <td>${team.FieldGoalPer || '-'}</td>
-            <td>${team.ThreePointShootingPer || '-'}</td>
-            <td>${team.FreeThrowShootingPer || '-'}</td>
+            <td class="player-name">${teamName}</td>
+            <td>${numberOfMatches}</td>
+            <td class="stat-good">${win}</td>
+            <td class="stat-bad">${lose}</td>
+            <td class="stat-highlight">${winper}</td>
+            <td>${score}</td>
+            <td>${rebound}</td>
+            <td>${assist}</td>
+            <td>${steal}</td>
+            <td>${block}</td>
+            <td>${fieldGoalPer}</td>
+            <td>${threePointPer}</td>
+            <td>${freeThrowPer}</td>
           </tr>
         `;
       });
@@ -883,7 +1456,541 @@
       teamBody.innerHTML = errorHtml;
     }
 
-    document.addEventListener('DOMContentLoaded', loadData);
+    function toggleAIPanel() {
+      const panel = document.getElementById('aiPanel');
+      const btn = document.getElementById('aiFabBtn');
+      panel.classList.toggle('show');
+      btn.classList.toggle('active');
+    }
+
+    function handleAIKeydown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendAIMessage();
+      }
+    }
+
+    function sendAIQuestion(question) {
+      document.getElementById('aiInput').value = question;
+      sendAIMessage();
+    }
+
+    function addAIMessage(content, isUser, hasChart = false, chartData = null) {
+      const messagesContainer = document.getElementById('aiMessages');
+      const welcome = messagesContainer.querySelector('.ai-welcome');
+      if (welcome) welcome.remove();
+
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `ai-message ${isUser ? 'user' : 'assistant'}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = 'ai-avatar';
+      avatar.textContent = isUser ? '👤' : '🤖';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'ai-bubble';
+      
+      if (hasChart && chartData) {
+        const renderedContent = marked.parse(content);
+        bubble.innerHTML = renderedContent;
+        highlightCodeInElement(bubble);
+        
+        const chartContainer = document.createElement('div');
+        chartContainer.className = 'ai-chart-container';
+        chartContainer.innerHTML = `<canvas id="aiChart${chartIdCounter}"></canvas>`;
+        bubble.appendChild(chartContainer);
+        
+        setTimeout(() => {
+          createChart(`aiChart${chartIdCounter}`, chartData);
+          chartIdCounter++;
+        }, 100);
+      } else {
+        const renderedContent = marked.parse(content);
+        bubble.innerHTML = renderedContent;
+        highlightCodeInElement(bubble);
+      }
+
+      messageDiv.appendChild(avatar);
+      messageDiv.appendChild(bubble);
+      messagesContainer.appendChild(messageDiv);
+
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function addTypingIndicator() {
+      const messagesContainer = document.getElementById('aiMessages');
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'ai-message assistant';
+      typingDiv.id = 'typingIndicator';
+      
+      typingDiv.innerHTML = `
+        <div class="ai-avatar">🤖</div>
+        <div class="ai-bubble">
+          <div class="ai-typing">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      `;
+      
+      messagesContainer.appendChild(typingDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      const typing = document.getElementById('typingIndicator');
+      if (typing) typing.remove();
+    }
+
+    function createChart(canvasId, chartData) {
+      const ctx = document.getElementById(canvasId);
+      if (!ctx) return;
+
+      const chartType = chartData.type || 'bar';
+      const colors = [
+        'rgba(6, 182, 212, 0.8)',
+        'rgba(139, 92, 246, 0.8)',
+        'rgba(236, 72, 153, 0.8)',
+        'rgba(34, 197, 94, 0.8)',
+        'rgba(245, 158, 11, 0.8)',
+        'rgba(239, 68, 68, 0.8)',
+        'rgba(59, 130, 246, 0.8)',
+        'rgba(168, 85, 247, 0.8)',
+        'rgba(20, 184, 166, 0.8)',
+        'rgba(249, 115, 22, 0.8)'
+      ];
+
+      const borderColors = [
+        'rgba(6, 182, 212, 1)',
+        'rgba(139, 92, 246, 1)',
+        'rgba(236, 72, 153, 1)',
+        'rgba(34, 197, 94, 1)',
+        'rgba(245, 158, 11, 1)',
+        'rgba(239, 68, 68, 1)',
+        'rgba(59, 130, 246, 1)',
+        'rgba(168, 85, 247, 1)',
+        'rgba(20, 184, 166, 1)',
+        'rgba(249, 115, 22, 1)'
+      ];
+
+      const chartConfig = {
+        type: chartType,
+        data: {
+          labels: chartData.labels || [],
+          datasets: [{
+            label: chartData.label || '',
+            data: chartData.data || [],
+            backgroundColor: chartType === 'line' ? 'rgba(6, 182, 212, 0.2)' : colors,
+            borderColor: chartType === 'line' ? 'rgba(6, 182, 212, 1)' : borderColors,
+            borderWidth: chartType === 'line' ? 2 : 1,
+            borderRadius: chartType === 'bar' ? 6 : 0,
+            fill: chartType === 'line',
+            tension: chartType === 'line' ? 0.4 : 0,
+            pointBackgroundColor: 'rgba(6, 182, 212, 1)',
+            pointBorderColor: '#fff',
+            pointRadius: chartType === 'line' ? 4 : 0,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: chartType === 'pie' || chartType === 'doughnut',
+              position: 'bottom',
+              labels: {
+                color: 'rgba(255, 255, 255, 0.7)',
+                font: { size: 10 },
+                padding: 10
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+              borderColor: 'rgba(6, 182, 212, 0.5)',
+              borderWidth: 1,
+              cornerRadius: 8,
+              padding: 10
+            }
+          },
+          scales: chartType !== 'pie' && chartType !== 'doughnut' ? {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(255, 255, 255, 0.05)',
+                drawBorder: false
+              },
+              ticks: {
+                color: 'rgba(255, 255, 255, 0.5)',
+                font: { size: 10 }
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: 'rgba(255, 255, 255, 0.5)',
+                font: { size: 10 },
+                maxRotation: 45,
+                minRotation: 0
+              }
+            }
+          } : {}
+        }
+      };
+
+      new Chart(ctx, chartConfig);
+    }
+
+    function buildDataContext() {
+      const topScorers = [...allPlayers]
+        .sort((a, b) => (parseFloat(b.score) || 0) - (parseFloat(a.score) || 0))
+        .slice(0, 10);
+      const topRebounders = [...allPlayers]
+        .sort((a, b) => (parseFloat(b.rebound) || 0) - (parseFloat(a.rebound) || 0))
+        .slice(0, 10);
+      const topAssisters = [...allPlayers]
+        .sort((a, b) => (parseFloat(b.assist) || 0) - (parseFloat(a.assist) || 0))
+        .slice(0, 10);
+      const topTeams = [...allTeams]
+        .sort((a, b) => {
+          const aPer = parseFloat((a.winper || '0').replace('%', '')) || 0;
+          const bPer = parseFloat((b.winper || '0').replace('%', '')) || 0;
+          return bPer - aPer;
+        })
+        .slice(0, 10);
+
+      return `
+当前页面NBA数据概览（2025-2026赛季）：
+
+【球员统计】
+- 总球员数：${allPlayers.length}人
+- 得分榜TOP10：${topScorers.map((p, i) => `${i+1}.${p.playerName}(${p.score}分)`).join('、')}
+- 篮板榜TOP10：${topRebounders.map((p, i) => `${i+1}.${p.playerName}(${p.rebound}个)`).join('、')}
+- 助攻榜TOP10：${topAssisters.map((p, i) => `${i+1}.${p.playerName}(${p.assist}次)`).join('、')}
+
+【球队统计】
+- 总球队数：${allTeams.length}支
+- 胜率榜TOP10：${topTeams.map((t, i) => `${i+1}.${t.Team}(${t.winper})`).join('、')}
+
+请基于以上数据回答用户问题。如果用户要求生成图表，请在回复末尾使用JSON格式标注图表数据，格式如下：
+[CHART_DATA]
+{
+  "type": "bar",
+  "labels": ["标签1", "标签2", ...],
+  "data": [数值1, 数值2, ...],
+  "label": "数据标签"
+}
+[/CHART_DATA]
+`;
+    }
+
+    function extractChartData(text) {
+      const chartMatch = text.match(/\[CHART_DATA\]([\s\S]*?)\[\/CHART_DATA\]/);
+      if (chartMatch) {
+        try {
+          return JSON.parse(chartMatch[1].trim());
+        } catch (e) {
+          return null;
+        }
+      }
+      return null;
+    }
+
+    function removeChartMarker(text) {
+      return text.replace(/\[CHART_DATA\][\s\S]*?\[\/CHART_DATA\]/g, '').trim();
+    }
+
+    function analyzeQuestion(question) {
+      const q = question.toLowerCase();
+      
+      if (q.includes('得分') && (q.includes('前') || q.includes('top') || q.includes('排名'))) {
+        const topPlayers = [...allPlayers]
+          .sort((a, b) => (parseFloat(b.score) || 0) - (parseFloat(a.score) || 0))
+          .slice(0, 10);
+        
+        return {
+          text: '📊 **得分榜TOP10球员**\n\n以下是本赛季得分最高的10位球员：',
+          hasChart: true,
+          chartData: {
+            type: 'bar',
+            labels: topPlayers.map(p => p.playerName || 'Unknown'),
+            data: topPlayers.map(p => parseFloat(p.score) || 0),
+            label: '得分'
+          }
+        };
+      }
+      
+      if (q.includes('篮板') && (q.includes('前') || q.includes('top') || q.includes('排名'))) {
+        const topPlayers = [...allPlayers]
+          .sort((a, b) => (parseFloat(b.rebound) || 0) - (parseFloat(a.rebound) || 0))
+          .slice(0, 10);
+        
+        return {
+          text: '📊 **篮板榜TOP10球员**\n\n以下是本赛季篮板最高的10位球员：',
+          hasChart: true,
+          chartData: {
+            type: 'bar',
+            labels: topPlayers.map(p => p.playerName || 'Unknown'),
+            data: topPlayers.map(p => parseFloat(p.rebound) || 0),
+            label: '篮板'
+          }
+        };
+      }
+      
+      if (q.includes('助攻') && (q.includes('前') || q.includes('top') || q.includes('排名'))) {
+        const topPlayers = [...allPlayers]
+          .sort((a, b) => (parseFloat(b.assist) || 0) - (parseFloat(a.assist) || 0))
+          .slice(0, 10);
+        
+        return {
+          text: '📊 **助攻榜TOP10球员**\n\n以下是本赛季助攻最高的10位球员：',
+          hasChart: true,
+          chartData: {
+            type: 'bar',
+            labels: topPlayers.map(p => p.playerName || 'Unknown'),
+            data: topPlayers.map(p => parseFloat(p.assist) || 0),
+            label: '助攻'
+          }
+        };
+      }
+      
+      if (q.includes('三分') && (q.includes('最好') || q.includes('最多') || q.includes('前') || q.includes('top'))) {
+        const topPlayers = [...allPlayers]
+          .sort((a, b) => (parseFloat(b.threePointFieldGoals) || 0) - (parseFloat(a.threePointFieldGoals) || 0))
+          .slice(0, 10);
+        
+        return {
+          text: '📊 **三分球TOP10球员**\n\n以下是本赛季三分命中数最多的10位球员：',
+          hasChart: true,
+          chartData: {
+            type: 'bar',
+            labels: topPlayers.map(p => p.playerName || 'Unknown'),
+            data: topPlayers.map(p => parseFloat(p.threePointFieldGoals) || 0),
+            label: '三分命中数'
+          }
+        };
+      }
+      
+      if (q.includes('球队') && (q.includes('胜率') || q.includes('排名'))) {
+        const topTeams = [...allTeams]
+          .sort((a, b) => {
+            const aPer = parseFloat((a.winper || '0').replace('%', '')) || 0;
+            const bPer = parseFloat((b.winper || '0').replace('%', '')) || 0;
+            return bPer - aPer;
+          })
+          .slice(0, 10);
+        
+        return {
+          text: '📊 **球队胜率TOP10**\n\n以下是本赛季胜率最高的10支球队：',
+          hasChart: true,
+          chartData: {
+            type: 'bar',
+            labels: topTeams.map(t => t.Team || 'Unknown'),
+            data: topTeams.map(t => parseFloat((t.winper || '0').replace('%', '')) || 0),
+            label: '胜率(%)'
+          }
+        };
+      }
+      
+      if (q.includes('球队') && q.includes('得分')) {
+        const topTeams = [...allTeams]
+          .sort((a, b) => (parseFloat(b.Score) || 0) - (parseFloat(a.Score) || 0))
+          .slice(0, 10);
+        
+        return {
+          text: '📊 **球队得分TOP10**\n\n以下是本赛季场均得分最高的10支球队：',
+          hasChart: true,
+          chartData: {
+            type: 'bar',
+            labels: topTeams.map(t => t.Team || 'Unknown'),
+            data: topTeams.map(t => parseFloat(t.Score) || 0),
+            label: '场均得分'
+          }
+        };
+      }
+      
+      if (q.includes('盖帽') || q.includes('封盖')) {
+        const topPlayers = [...allPlayers]
+          .sort((a, b) => (parseFloat(b.block) || 0) - (parseFloat(a.block) || 0))
+          .slice(0, 10);
+        
+        return {
+          text: '📊 **盖帽榜TOP10球员**\n\n以下是本赛季盖帽最多的10位球员：',
+          hasChart: true,
+          chartData: {
+            type: 'bar',
+            labels: topPlayers.map(p => p.playerName || 'Unknown'),
+            data: topPlayers.map(p => parseFloat(p.block) || 0),
+            label: '盖帽'
+          }
+        };
+      }
+      
+      if (q.includes('抢断')) {
+        const topPlayers = [...allPlayers]
+          .sort((a, b) => (parseFloat(b.steal) || 0) - (parseFloat(a.steal) || 0))
+          .slice(0, 10);
+        
+        return {
+          text: '📊 **抢断榜TOP10球员**\n\n以下是本赛季抢断最多的10位球员：',
+          hasChart: true,
+          chartData: {
+            type: 'bar',
+            labels: topPlayers.map(p => p.playerName || 'Unknown'),
+            data: topPlayers.map(p => parseFloat(p.steal) || 0),
+            label: '抢断'
+          }
+        };
+      }
+      
+      return null;
+    }
+
+    async function sendAIMessage() {
+      const input = document.getElementById('aiInput');
+      const sendBtn = document.getElementById('aiSendBtn');
+      const question = input.value.trim();
+      
+      if (!question || sendBtn.disabled) return;
+
+      addAIMessage(question, true);
+      input.value = '';
+      sendBtn.disabled = true;
+
+      addTypingIndicator();
+
+      const localResult = analyzeQuestion(question);
+      if (localResult) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        removeTypingIndicator();
+        addAIMessage(localResult.text, false, localResult.hasChart, localResult.chartData);
+        sendBtn.disabled = false;
+        return;
+      }
+
+      try {
+        const systemContext = buildDataContext();
+        const messagesForAPI = [
+          { role: 'system', content: systemContext },
+          ...conversationHistory,
+          { role: 'user', content: question }
+        ];
+
+        const response = await fetch(`${API_BASE_URL}/api/ai/stream?${new URLSearchParams({
+          message: question,
+          history: JSON.stringify(conversationHistory),
+          model: 'glm-4.7-flash',
+          webSearch: webSearchEnabled
+        })}`, {
+          method: 'GET',
+          headers: { 'Accept': 'text/event-stream' }
+        });
+
+        if (!response.ok) {
+          throw new Error('API请求失败');
+        }
+
+        removeTypingIndicator();
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullResponse = '';
+        let currentMessageDiv = null;
+        let currentBubble = null;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (line.startsWith('event:searching')) {
+              if (!currentMessageDiv) {
+                currentMessageDiv = document.createElement('div');
+                currentMessageDiv.className = 'ai-message assistant';
+                currentMessageDiv.innerHTML = `
+                  <div class="ai-avatar">🤖</div>
+                  <div class="ai-bubble"></div>
+                `;
+                document.getElementById('aiMessages').appendChild(currentMessageDiv);
+                currentBubble = currentMessageDiv.querySelector('.ai-bubble');
+              }
+              const searchDiv = document.createElement('div');
+              searchDiv.className = 'searching-indicator';
+              searchDiv.style.cssText = 'padding: 8px 12px; background: rgba(16, 185, 129, 0.1); border-radius: 6px; margin-bottom: 10px; color: #10b981; font-size: 0.8rem;';
+              searchDiv.innerHTML = '🔍 正在联网搜索最新信息...';
+              currentBubble.appendChild(searchDiv);
+              continue;
+            }
+            if (line.startsWith('event:')) continue;
+            if (line.startsWith('data:')) {
+              const data = line.substring(5).trim();
+              if (data && data !== '[DONE]') {
+                fullResponse += data;
+                
+                if (!currentMessageDiv) {
+                  currentMessageDiv = document.createElement('div');
+                  currentMessageDiv.className = 'ai-message assistant';
+                  currentMessageDiv.innerHTML = `
+                    <div class="ai-avatar">🤖</div>
+                    <div class="ai-bubble"></div>
+                  `;
+                  document.getElementById('aiMessages').appendChild(currentMessageDiv);
+                  currentBubble = currentMessageDiv.querySelector('.ai-bubble');
+                }
+
+                const chartData = extractChartData(fullResponse);
+                const displayText = removeChartMarker(fullResponse);
+                currentBubble.innerHTML = marked.parse(displayText);
+                highlightCodeInElement(currentBubble);
+                
+                if (chartData) {
+                  let chartContainer = currentBubble.querySelector('.ai-chart-container');
+                  if (!chartContainer) {
+                    chartContainer = document.createElement('div');
+                    chartContainer.className = 'ai-chart-container';
+                    chartContainer.innerHTML = `<canvas id="aiChart${chartIdCounter}"></canvas>`;
+                    currentBubble.appendChild(chartContainer);
+                    
+                    setTimeout(() => {
+                      createChart(`aiChart${chartIdCounter}`, chartData);
+                      chartIdCounter++;
+                    }, 100);
+                  }
+                }
+
+                document.getElementById('aiMessages').scrollTop = document.getElementById('aiMessages').scrollHeight;
+              }
+            }
+          }
+        }
+
+        conversationHistory.push(
+          { role: 'user', content: question },
+          { role: 'assistant', content: fullResponse }
+        );
+
+        if (conversationHistory.length > 20) {
+          conversationHistory = conversationHistory.slice(-20);
+        }
+
+      } catch (error) {
+        console.error('AI请求失败:', error);
+        removeTypingIndicator();
+        addAIMessage('抱歉，AI服务暂时不可用。请稍后再试。', false);
+      }
+
+      sendBtn.disabled = false;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadData();
+    });
   </script>
   <script src="./js/gsap-animations.js"></script>
 </body>

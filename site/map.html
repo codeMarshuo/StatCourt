@@ -40,62 +40,6 @@
       overflow: hidden;
     }
 
-    .nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      background: rgba(10, 15, 26, 0.9);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .nav-inner {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 24px;
-      height: 64px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .brand {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      text-decoration: none;
-      letter-spacing: -0.02em;
-    }
-
-    .brand span {
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .nav-links {
-      display: flex;
-      list-style: none;
-      gap: 24px;
-    }
-
-    .nav-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 0.8rem;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-
-    .nav-links a:hover,
-    .nav-links a.active {
-      color: var(--text-primary);
-    }
-
     #map-container {
       position: fixed;
       top: 64px;
@@ -544,24 +488,7 @@
   </style>
 </head>
 <body>
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="./index.html" class="brand">Stat<span>Court</span></a>
-      <ul class="nav-links">
-        <li><a href="./index.html">首页</a></li>
-        <li><a href="./data.html">数据</a></li>
-        <li><a href="./teams.html">球队</a></li>
-        <li><a href="./visualization.html">可视化</a></li>
-        <li><a href="./chat.html">AI助手</a></li>
-        <li><a href="./advanced.html">高阶数据</a></li>
-        <li><a href="./compare.html">对比</a></li>
-        <li><a href="./demo.html">3D展示</a></li>
-        <li><a href="./demo-advanced.html">3D高阶</a></li>
-        <li><a href="./map.html" class="active">球队地图</a></li>
-        <li><a href="./match.html">比赛模拟</a></li>
-      </ul>
-    </div>
-  </nav>
+  <script src="./js/nav.js"></script>
 
   <div id="map-container">
     <div id="map"></div>

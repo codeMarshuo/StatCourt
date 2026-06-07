@@ -9,13 +9,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
       --bg-primary: #0a0a0f;
       --bg-secondary: rgba(20, 20, 30, 0.6);
@@ -28,15 +24,10 @@
       --text-secondary: #a1a1aa;
       --text-muted: #71717a;
       --border: rgba(255, 255, 255, 0.08);
-      --glass: rgba(255, 255, 255, 0.03);
-      --success: #22c55e;
-      --warning: #f59e0b;
-      --danger: #ef4444;
       --gold: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
       --silver: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%);
       --bronze: linear-gradient(135deg, #d97706 0%, #92400e 100%);
     }
-
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg-primary);
@@ -45,17 +36,13 @@
       line-height: 1.5;
       overflow-x: hidden;
     }
-
     .bg-animation {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       z-index: -1;
       overflow: hidden;
     }
-
     .bg-orb {
       position: absolute;
       border-radius: 50%;
@@ -63,433 +50,213 @@
       opacity: 0.5;
       animation: float 20s ease-in-out infinite;
     }
-
     .bg-orb:nth-child(1) {
-      width: 600px;
-      height: 600px;
+      width: 600px; height: 600px;
       background: radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 70%);
-      top: -200px;
-      left: -100px;
-      animation-delay: 0s;
+      top: -200px; left: -100px;
     }
-
     .bg-orb:nth-child(2) {
-      width: 500px;
-      height: 500px;
+      width: 500px; height: 500px;
       background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
-      top: 50%;
-      right: -150px;
+      top: 50%; right: -150px;
       animation-delay: -5s;
     }
-
     .bg-orb:nth-child(3) {
-      width: 400px;
-      height: 400px;
+      width: 400px; height: 400px;
       background: radial-gradient(circle, rgba(236, 72, 153, 0.3) 0%, transparent 70%);
-      bottom: -100px;
-      left: 30%;
+      bottom: -100px; left: 30%;
       animation-delay: -10s;
     }
-
-    .bg-orb:nth-child(4) {
-      width: 300px;
-      height: 300px;
-      background: radial-gradient(circle, rgba(34, 197, 94, 0.2) 0%, transparent 70%);
-      top: 40%;
-      left: 10%;
-      animation-delay: -15s;
-    }
-
     @keyframes float {
-      0%, 100% {
-        transform: translate(0, 0) scale(1);
-      }
-      25% {
-        transform: translate(50px, -50px) scale(1.1);
-      }
-      50% {
-        transform: translate(-30px, 30px) scale(0.95);
-      }
-      75% {
-        transform: translate(-50px, -30px) scale(1.05);
-      }
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(50px, -50px) scale(1.1); }
+      50% { transform: translate(-30px, 30px) scale(0.95); }
+      75% { transform: translate(-50px, -30px) scale(1.05); }
     }
-
     .bg-grid {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background-image: 
         linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
       background-size: 60px 60px;
       animation: gridMove 30s linear infinite;
     }
-
     @keyframes gridMove {
-      0% {
-        transform: translate(0, 0);
-      }
-      100% {
-        transform: translate(60px, 60px);
-      }
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(60px, 60px); }
     }
-
-    .nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      background: rgba(10, 10, 15, 0.7);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .nav-inner {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 24px;
-      height: 64px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .brand {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      text-decoration: none;
-      letter-spacing: -0.02em;
-      transition: all 0.3s ease;
-    }
-
-    .brand:hover {
-      text-shadow: 0 0 20px var(--accent-glow);
-    }
-
-    .brand span {
-      background: linear-gradient(135deg, var(--accent) 0%, #ec4899 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .nav-links {
-      display: flex;
-      list-style: none;
-      gap: 32px;
-    }
-
-    .nav-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 0.875rem;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-
-    .nav-links a::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--accent), #ec4899);
-      transition: width 0.3s ease;
-      border-radius: 1px;
-    }
-
-    .nav-links a:hover,
-    .nav-links a.active {
-      color: var(--text-primary);
-    }
-
-    .nav-links a:hover::after,
-    .nav-links a.active::after {
-      width: 100%;
-    }
-
     .main {
       padding: 96px 24px 48px;
       max-width: 1400px;
       margin: 0 auto;
       position: relative;
     }
-
     .header {
       margin-bottom: 32px;
       animation: fadeInUp 0.6s ease-out;
     }
-
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-
     .header h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 8px;
-      letter-spacing: -0.02em;
-    }
-
-    .header p {
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-    }
-
-    .controls {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-      align-items: center;
-      animation: fadeInUp 0.6s ease-out 0.1s both;
-    }
-
-    .select-wrapper {
-      position: relative;
-    }
-
-    .select-wrapper select {
-      appearance: none;
-      background: var(--bg-card);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 44px 12px 16px;
-      color: var(--text-primary);
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      min-width: 180px;
-      transition: all 0.3s ease;
-    }
-
-    .select-wrapper select:hover {
-      border-color: rgba(255, 255, 255, 0.15);
-      background: var(--bg-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-    }
-
-    .select-wrapper select:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow), 0 8px 25px rgba(0, 0, 0, 0.3);
-    }
-
-    .select-wrapper::after {
-      content: '';
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 0;
-      height: 0;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-top: 6px solid var(--text-secondary);
-      pointer-events: none;
-      transition: transform 0.3s ease;
-    }
-
-    .select-wrapper:hover::after {
-      transform: translateY(-50%) rotate(180deg);
-    }
-
-    .select-wrapper select option {
-      background: rgba(30, 30, 45, 0.95);
-      color: var(--text-primary);
-      padding: 12px;
-    }
-
-    .search-input {
-      background: var(--bg-card);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 16px;
-      color: var(--text-primary);
-      font-size: 0.875rem;
-      min-width: 200px;
-      transition: all 0.3s ease;
-    }
-
-    .search-input::placeholder {
-      color: var(--text-muted);
-    }
-
-    .search-input:hover {
-      border-color: rgba(255, 255, 255, 0.15);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-    }
-
-    .search-input:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow), 0 8px 25px rgba(0, 0, 0, 0.3);
-    }
-
-    .glossary-toggle {
-      margin-left: auto;
-      background: var(--bg-card);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 20px;
-      color: var(--text-secondary);
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.3s ease;
-    }
-
-    .glossary-toggle:hover {
-      background: var(--bg-hover);
-      color: var(--text-primary);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-      border-color: rgba(255, 255, 255, 0.15);
-    }
-
-    .glossary-toggle svg {
-      width: 16px;
-      height: 16px;
-      transition: transform 0.3s ease;
-    }
-
-    .glossary-toggle.active {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
-    }
-
-    .glossary-toggle.active svg {
-      transform: rotate(180deg);
-    }
-
-    .glossary {
-      background: var(--bg-card);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      margin-bottom: 24px;
-      overflow: hidden;
-      display: none;
-      animation: fadeInUp 0.4s ease-out;
-    }
-
-    .glossary.show {
-      display: block;
-    }
-
-    .glossary-header {
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--border);
-      font-weight: 600;
-      font-size: 0.95rem;
-      color: var(--text-primary);
-      background: var(--glass);
-    }
-
-    .glossary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1px;
-      background: var(--border);
-    }
-
-    .glossary-item {
-      background: var(--bg-card);
-      padding: 16px 20px;
-      transition: all 0.3s ease;
-    }
-
-    .glossary-item:hover {
-      background: var(--bg-hover);
-      transform: scale(1.02);
-    }
-
-    .glossary-term {
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 2.5rem;
+      font-weight: 800;
       background: linear-gradient(135deg, var(--accent-light) 0%, #ec4899 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
-
-    .glossary-desc {
-      font-size: 0.75rem;
+    .header p {
       color: var(--text-secondary);
-      line-height: 1.6;
+      font-size: 1rem;
     }
-
+    .controls {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.6s ease-out 0.1s both;
+    }
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 12px 16px 12px 44px;
+      background: var(--bg-card);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    .search-box::before {
+      content: '🔍';
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+    .filter-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .filter-group select {
+      padding: 10px 16px;
+      background: var(--bg-card);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .filter-group select:hover {
+      border-color: var(--accent);
+    }
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      background: var(--bg-card);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 6px;
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--accent) 0%, #ec4899 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    }
+    .stats-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+      animation: fadeInUp 0.6s ease-out 0.15s both;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-light) 0%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
     .table-container {
       background: var(--bg-card);
       backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--border);
       border-radius: 20px;
       overflow: hidden;
       animation: fadeInUp 0.6s ease-out 0.2s both;
-      box-shadow: 
-        0 4px 6px rgba(0, 0, 0, 0.1),
-        0 10px 40px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 40px rgba(0, 0, 0, 0.2);
     }
-
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
     .table-scroll {
       overflow-x: auto;
+      max-height: 65vh;
+      overflow-y: auto;
     }
-
-    .table-scroll::-webkit-scrollbar {
-      height: 8px;
-    }
-
-    .table-scroll::-webkit-scrollbar-track {
-      background: var(--bg-secondary);
-    }
-
-    .table-scroll::-webkit-scrollbar-thumb {
-      background: var(--accent);
-      border-radius: 4px;
-    }
-
+    .table-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+    .table-scroll::-webkit-scrollbar-track { background: var(--bg-secondary); }
+    .table-scroll::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
     .data-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.8rem;
-      min-width: 1800px;
     }
-
     .data-table th {
       background: var(--bg-secondary);
       backdrop-filter: blur(10px);
@@ -506,30 +273,14 @@
       top: 0;
       z-index: 10;
     }
-
     .data-table th:hover {
       background: var(--bg-hover);
       color: var(--text-primary);
-      transform: translateY(-1px);
     }
-
     .data-table th.sorted {
       background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(236, 72, 153, 0.1) 100%);
       color: var(--accent-light);
     }
-
-    .sort-icon {
-      margin-left: 4px;
-      opacity: 0.4;
-      font-size: 0.7rem;
-      transition: all 0.3s ease;
-    }
-
-    .data-table th.sorted .sort-icon {
-      opacity: 1;
-      color: var(--accent);
-    }
-
     .data-table td {
       padding: 14px 12px;
       text-align: center;
@@ -537,23 +288,11 @@
       color: var(--text-primary);
       transition: all 0.2s ease;
     }
-
-    .data-table tbody tr {
-      transition: all 0.3s ease;
-    }
-
+    .data-table tbody tr { transition: all 0.3s ease; }
     .data-table tbody tr:hover {
       background: linear-gradient(90deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.05) 100%);
     }
-
-    .data-table tbody tr:hover td {
-      transform: scale(1.01);
-    }
-
-    .data-table tbody tr:last-child td {
-      border-bottom: none;
-    }
-
+    .data-table tbody tr:last-child td { border-bottom: none; }
     .rank {
       display: inline-flex;
       align-items: center;
@@ -567,592 +306,493 @@
       color: var(--text-secondary);
       transition: all 0.3s ease;
     }
-
-    tr:hover .rank {
-      transform: scale(1.1);
-    }
-
+    tr:hover .rank { transform: scale(1.1); }
     tr:nth-child(1) .rank {
       background: var(--gold);
       color: #1a1a21;
       box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);
     }
-
     tr:nth-child(2) .rank {
       background: var(--silver);
       color: #1a1a21;
-      box-shadow: 0 4px 15px rgba(148, 163, 184, 0.3);
+      box-shadow: 0 4px 15px rgba(148, 163, 184, 0.4);
     }
-
     tr:nth-child(3) .rank {
       background: var(--bronze);
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(217, 119, 6, 0.3);
+      color: #1a1a21;
+      box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4);
     }
-
-    .player-info {
+    .player-cell {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       text-align: left;
     }
-
     .player-avatar {
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent) 0%, #ec4899 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #fff;
-      flex-shrink: 0;
-      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
-      transition: all 0.3s ease;
-    }
-
-    .player-avatar img {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
       object-fit: cover;
+      border: 2px solid var(--border);
     }
-
-    tr:hover .player-avatar {
-      transform: scale(1.1) rotate(5deg);
-      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
-    }
-
+    .player-info { display: flex; flex-direction: column; }
     .player-name {
       font-weight: 600;
       color: var(--text-primary);
-      transition: all 0.3s ease;
+      font-size: 0.85rem;
     }
-
-    tr:hover .player-name {
-      color: var(--accent-light);
-    }
-
     .player-team {
       font-size: 0.7rem;
       color: var(--text-muted);
     }
-
-    .stat-good {
-      color: var(--success);
-      font-weight: 500;
-    }
-
-    .stat-great {
-      color: var(--success);
+    .highlight {
+      color: var(--accent-light);
       font-weight: 600;
-      text-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
     }
-
-    .stat-warning {
-      color: var(--warning);
-      font-weight: 500;
-    }
-
-    .stat-bad {
-      color: var(--danger);
-      font-weight: 500;
-    }
-
     .loading {
       text-align: center;
-      padding: 80px 20px;
-      color: var(--text-secondary);
+      padding: 60px;
+      color: var(--text-muted);
     }
-
-    .loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--accent);
+      border-top-color: transparent;
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin: 0 auto 20px;
+      margin-left: 10px;
+      vertical-align: middle;
     }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .loading-text {
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.5; }
-      50% { opacity: 1; }
-    }
-
-    .error {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--danger);
-    }
-
-    .footer {
-      text-align: center;
-      padding: 40px 24px;
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      border-top: 1px solid var(--border);
-      margin-top: 48px;
-      background: var(--bg-card);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-
+    @keyframes spin { to { transform: rotate(360deg); } }
     @media (max-width: 768px) {
-      .nav-links {
-        display: none;
-      }
-
-      .controls {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .select-wrapper select,
-      .search-input {
-        width: 100%;
-        min-width: auto;
-      }
-
-      .glossary-toggle {
-        margin-left: 0;
-        justify-content: center;
-      }
-
-      .bg-orb {
-        opacity: 0.3;
-      }
+      .main { padding: 80px 16px 32px; }
+      .header h1 { font-size: 2rem; }
+      .controls { flex-direction: column; }
+      .filter-group { width: 100%; }
+      .filter-group select { flex: 1; }
     }
   </style>
 </head>
 <body>
   <div class="bg-animation">
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
     <div class="bg-grid"></div>
-    <div class="bg-orb"></div>
-    <div class="bg-orb"></div>
-    <div class="bg-orb"></div>
-    <div class="bg-orb"></div>
   </div>
 
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="./index.html" class="brand">Stat<span>Court</span></a>
-      <ul class="nav-links">
-        <li><a href="./index.html">首页</a></li>
-        <li><a href="./data.html">数据</a></li>
-        <li><a href="./teams.html">球队</a></li>
-        <li><a href="./visualization.html">可视化</a></li>
-        <li><a href="./chat.html">AI助手</a></li>
-        <li><a href="./advanced.html" class="active">高阶数据</a></li>
-        <li><a href="./compare.html">对比</a></li>
-        <li><a href="./demo.html">3D展示</a></li>
-        <li><a href="./demo-advanced.html">3D高阶</a></li>
-        <li><a href="./map.html">球队地图</a></li>
-        <li><a href="./match.html">比赛模拟</a></li>
-      </ul>
-    </div>
-  </nav>
+  <script src="./js/nav.js"></script>
 
   <main class="main">
     <div class="header">
-      <h1>NBA 高阶数据统计</h1>
-      <p>Advanced Statistics · PER, WS, VORP, BPM</p>
+      <h1>高阶数据统计</h1>
+      <p>全面展示NBA球员高阶数据分析</p>
     </div>
 
     <div class="controls">
-      <div class="select-wrapper">
-        <select id="orderBy">
-          <option value="bpm">BPM 盒正负值</option>
-          <option value="vorp">VORP 替代价值</option>
-          <option value="ws">WS 胜利贡献</option>
-          <option value="per">PER 效率值</option>
-          <option value="ws_48">WS/48 每48分钟</option>
-          <option value="obpm">OBPM 进攻正负</option>
-          <option value="dbpm">DBPM 防守正负</option>
-          <option value="ows">OWS 进攻贡献</option>
-          <option value="dws">DWS 防守贡献</option>
-          <option value="usg_pct">USG% 使用率</option>
-          <option value="ts_pct">TS% 真实命中</option>
-          <option value="three_par">3PAr 三分率</option>
-          <option value="ftr">FTr 罚球率</option>
-          <option value="orb_pct">ORB% 进攻篮板</option>
-          <option value="drb_pct">DRB% 防守篮板</option>
-          <option value="trb_pct">TRB% 总篮板</option>
-          <option value="ast_pct">AST% 助攻率</option>
-          <option value="stl_pct">STL% 抢断率</option>
-          <option value="blk_pct">BLK% 盖帽率</option>
-          <option value="tov_pct">TOV% 失误率</option>
-          <option value="mp">MP 上场时间</option>
-          <option value="g">G 出场次数</option>
-          <option value="gs">GS 首发次数</option>
-          <option value="age">Age 年龄</option>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="搜索球员姓名或球队...">
+      </div>
+      <div class="filter-group">
+        <select id="sortBy">
+          <option value="per">按PER排序</option>
+          <option value="ws">按WS排序</option>
+          <option value="bpm">按BPM排序</option>
+          <option value="vorp">按VORP排序</option>
+          <option value="usg_pct">按使用率排序</option>
+          <option value="ts_pct">按真实命中率排序</option>
+        </select>
+        <select id="limitSelect">
+          <option value="20">显示20条</option>
+          <option value="50">显示50条</option>
+          <option value="100">显示100条</option>
+          <option value="all">显示全部</option>
         </select>
       </div>
-      <div class="select-wrapper">
-        <select id="limit">
-          <option value="20">TOP 20</option>
-          <option value="50" selected>TOP 50</option>
-          <option value="100">TOP 100</option>
-          <option value="200">TOP 200</option>
-          <option value="500">TOP 500</option>
-        </select>
-      </div>
-      <input type="text" class="search-input" id="searchName" placeholder="搜索球员...">
-      <button class="glossary-toggle" id="glossaryToggle">
-        术语说明
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M6 9l6 6 6-6"/>
-        </svg>
-      </button>
     </div>
 
-    <div class="glossary" id="glossary">
-      <div class="glossary-header">高阶数据术语解释</div>
-      <div class="glossary-grid">
-        <div class="glossary-item">
-          <div class="glossary-term">PER 球员效率值</div>
-          <div class="glossary-desc">综合衡量球员每分钟贡献，联盟平均15.0。>25超级巨星，20-25全明星</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">TS% 真实命中率</div>
-          <div class="glossary-desc">考虑两分三分罚球的真实效率。>60%优秀，>65%顶级</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">3PAr 三分出手率</div>
-          <div class="glossary-desc">三分出手占总出手比例。>40%为高出三分球员</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">FTr 罚球率</div>
-          <div class="glossary-desc">罚球次数占总出手比例。>40%善于制造犯规</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">ORB% 进攻篮板率</div>
-          <div class="glossary-desc">在场时抢到进攻篮板百分比。>10%优秀</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">DRB% 防守篮板率</div>
-          <div class="glossary-desc">在场时抢到防守篮板百分比。>20%优秀</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">TRB% 总篮板率</div>
-          <div class="glossary-desc">在场时抢到总篮板百分比。>15%优秀</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">AST% 助攻率</div>
-          <div class="glossary-desc">在场时助攻占队友进球比例。>25%优秀组织者</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">STL% 抢断率</div>
-          <div class="glossary-desc">抢断占对手进攻回合比例。>2.5%优秀</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">BLK% 盖帽率</div>
-          <div class="glossary-desc">盖帽占对手两分出手比例。>4%优秀</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">TOV% 失误率</div>
-          <div class="glossary-desc">失误占进攻回合比例。<12%控球优秀</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">USG% 使用率</div>
-          <div class="glossary-desc">进攻回合以该球员结束比例。>25%球队核心</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">OWS 进攻胜利贡献</div>
-          <div class="glossary-desc">进攻端对胜利贡献。>5优秀进攻球员</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">DWS 防守胜利贡献</div>
-          <div class="glossary-desc">防守端对胜利贡献。>3优秀防守球员</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">WS 胜利贡献值</div>
-          <div class="glossary-desc">对球队胜利总贡献。>10全明星，>15 MVP级别</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">WS/48 每48分钟贡献</div>
-          <div class="glossary-desc">标准化胜利贡献。>0.200优秀，>0.250顶级</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">OBPM 进攻盒正负值</div>
-          <div class="glossary-desc">每100回合进攻端正负值。>5优秀</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">DBPM 防守盒正负值</div>
-          <div class="glossary-desc">每100回合防守端正负值。>2优秀</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">BPM 盒正负值</div>
-          <div class="glossary-desc">每100回合净胜分。>5全明星，>10 MVP级别</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">VORP 替代球员价值</div>
-          <div class="glossary-desc">相比替代球员价值。>5全明星，>8 MVP级别</div>
-        </div>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="per">PER效率值</button>
+      <button class="tab-btn" data-tab="ws">胜利贡献值</button>
+      <button class="tab-btn" data-tab="bpm">BPM</button>
+      <button class="tab-btn" data-tab="vorp">VORP</button>
+      <button class="tab-btn" data-tab="all">全部数据</button>
+    </div>
+
+    <div class="stats-summary" id="statsSummary">
+      <div class="stat-card">
+        <div class="stat-label">总球员数</div>
+        <div class="stat-value" id="totalPlayers">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">最高PER</div>
+        <div class="stat-value" id="maxPer">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">平均PER</div>
+        <div class="stat-value" id="avgPer">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">最高WS</div>
+        <div class="stat-value" id="maxWs">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">最高BPM</div>
+        <div class="stat-value" id="maxBpm">0</div>
       </div>
     </div>
 
     <div class="table-container">
-      <div class="table-scroll">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>球员</th>
-              <th onclick="sortBy('age')" data-col="age">年龄<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('team')" data-col="team">球队<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('pos')" data-col="pos">位置<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('g')" data-col="g">场次<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('gs')" data-col="gs">首发<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('mp')" data-col="mp">分钟<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('per')" data-col="per">PER<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('ts_pct')" data-col="ts_pct">TS%<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('three_par')" data-col="three_par">3PAr<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('ftr')" data-col="ftr">FTr<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('orb_pct')" data-col="orb_pct">ORB%<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('drb_pct')" data-col="drb_pct">DRB%<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('trb_pct')" data-col="trb_pct">TRB%<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('ast_pct')" data-col="ast_pct">AST%<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('stl_pct')" data-col="stl_pct">STL%<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('blk_pct')" data-col="blk_pct">BLK%<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('tov_pct')" data-col="tov_pct">TOV%<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('usg_pct')" data-col="usg_pct">USG%<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('ows')" data-col="ows">OWS<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('dws')" data-col="dws">DWS<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('ws')" data-col="ws">WS<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('ws_48')" data-col="ws_48">WS/48<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('obpm')" data-col="obpm">OBPM<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('dbpm')" data-col="dbpm">DBPM<span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('bpm')" data-col="bpm" class="sorted">BPM<span class="sort-icon">↓</span></th>
-              <th onclick="sortBy('vorp')" data-col="vorp">VORP<span class="sort-icon">↕</span></th>
-            </tr>
-          </thead>
-          <tbody id="tableBody">
-            <tr>
-              <td colspan="28">
-                <div class="loading">
-                  <div class="loading-spinner"></div>
-                  <div class="loading-text">正在加载数据...</div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="tab-content active" id="perTab">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>排名</th>
+                <th>球员</th>
+                <th>球队</th>
+                <th>位置</th>
+                <th>场次</th>
+                <th>PER</th>
+                <th>TS%</th>
+                <th>USG%</th>
+                <th>WS</th>
+                <th>BPM</th>
+              </tr>
+            </thead>
+            <tbody id="perTableBody">
+              <tr><td colspan="10" class="loading">加载中</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-content" id="wsTab">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>排名</th>
+                <th>球员</th>
+                <th>球队</th>
+                <th>OWS</th>
+                <th>DWS</th>
+                <th>WS</th>
+                <th>WS/48</th>
+                <th>PER</th>
+                <th>BPM</th>
+              </tr>
+            </thead>
+            <tbody id="wsTableBody">
+              <tr><td colspan="9" class="loading">加载中</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-content" id="bpmTab">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>排名</th>
+                <th>球员</th>
+                <th>球队</th>
+                <th>OBPM</th>
+                <th>DBPM</th>
+                <th>BPM</th>
+                <th>VORP</th>
+                <th>PER</th>
+                <th>WS</th>
+              </tr>
+            </thead>
+            <tbody id="bpmTableBody">
+              <tr><td colspan="9" class="loading">加载中</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-content" id="vorpTab">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>排名</th>
+                <th>球员</th>
+                <th>球队</th>
+                <th>VORP</th>
+                <th>BPM</th>
+                <th>WS</th>
+                <th>MP</th>
+                <th>PER</th>
+              </tr>
+            </thead>
+            <tbody id="vorpTableBody">
+              <tr><td colspan="8" class="loading">加载中</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-content" id="allTab">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>排名</th>
+                <th>球员</th>
+                <th>球队</th>
+                <th>位置</th>
+                <th>PER</th>
+                <th>TS%</th>
+                <th>3PAr</th>
+                <th>FTr</th>
+                <th>ORB%</th>
+                <th>DRB%</th>
+                <th>TRB%</th>
+                <th>AST%</th>
+                <th>STL%</th>
+                <th>BLK%</th>
+                <th>TOV%</th>
+                <th>USG%</th>
+                <th>OWS</th>
+                <th>DWS</th>
+                <th>WS</th>
+                <th>WS/48</th>
+                <th>OBPM</th>
+                <th>DBPM</th>
+                <th>BPM</th>
+                <th>VORP</th>
+              </tr>
+            </thead>
+            <tbody id="allTableBody">
+              <tr><td colspan="24" class="loading">加载中</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </main>
 
-  <footer class="footer">
-    Copyright ©2026 StatCourt · NBA数据球场
-  </footer>
-
   <script>
-    const API_BASE_URL = 'http://localhost:8081';
-    let currentOrderBy = 'bpm';
-    let currentLimit = 50;
-    let currentSortDesc = true;
+    let allData = [];
+    let currentSort = 'per';
 
-    document.getElementById('glossaryToggle').addEventListener('click', function() {
-      const glossary = document.getElementById('glossary');
-      this.classList.toggle('active');
-      glossary.classList.toggle('show');
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab + 'Tab').classList.add('active');
+      });
     });
 
     async function loadData() {
-      const orderBy = document.getElementById('orderBy').value;
-      const limit = parseInt(document.getElementById('limit').value);
-      const searchName = document.getElementById('searchName').value.trim();
-
-      currentOrderBy = orderBy;
-      currentLimit = limit;
-      
-      updateSortIndicator(orderBy, currentSortDesc);
-
       try {
-        let url = '';
-        if (searchName) {
-          url = `${API_BASE_URL}/api/advanced/search?name=${encodeURIComponent(searchName)}`;
-        } else {
-          const orderDir = currentSortDesc ? 'desc' : 'asc';
-          url = `${API_BASE_URL}/api/advanced/all?orderBy=${orderBy}&orderDir=${orderDir}&limit=${limit}`;
+        const res = await axios.get(`${API_BASE_URL}/api/advanced/all?orderBy=${currentSort}&orderDir=desc&limit=500`);
+        if (res.data.code === 200 || res.data.code === 0) {
+          allData = res.data.data || [];
+          updateStats();
+          renderAllTables();
         }
-
-        const response = await fetch(url);
-        const res = await response.json();
-
-        if (res.code === 200) {
-          renderTable(res.data);
-        } else {
-          showError(res.message);
-        }
-      } catch (error) {
-        console.error('加载数据失败:', error);
-        showError('加载数据失败: ' + error.message);
+      } catch (e) {
+        console.error('加载数据失败:', e);
       }
     }
-    
-    function updateSortIndicator(column, isDesc) {
-      document.querySelectorAll('.data-table th').forEach(th => {
-        th.classList.remove('sorted');
-        const icon = th.querySelector('.sort-icon');
-        if (icon) icon.textContent = '↕';
-      });
+
+    function updateStats() {
+      document.getElementById('totalPlayers').textContent = allData.length;
       
-      const currentTh = document.querySelector(`th[data-col="${column}"]`);
-      if (currentTh) {
-        currentTh.classList.add('sorted');
-        const icon = currentTh.querySelector('.sort-icon');
-        if (icon) icon.textContent = isDesc ? '↓' : '↑';
-      }
+      const perValues = allData.map(p => parseFloat(p.per) || 0).filter(v => v > 0);
+      const wsValues = allData.map(p => parseFloat(p.ws) || 0).filter(v => v > 0);
+      const bpmValues = allData.map(p => parseFloat(p.bpm) || 0);
+      
+      document.getElementById('maxPer').textContent = Math.max(...perValues).toFixed(1);
+      document.getElementById('avgPer').textContent = (perValues.reduce((a, b) => a + b, 0) / perValues.length).toFixed(1);
+      document.getElementById('maxWs').textContent = Math.max(...wsValues).toFixed(1);
+      document.getElementById('maxBpm').textContent = Math.max(...bpmValues).toFixed(1);
     }
 
-    function renderTable(data) {
-      const tbody = document.getElementById('tableBody');
+    function renderAllTables() {
+      renderPerTable();
+      renderWsTable();
+      renderBpmTable();
+      renderVorpTable();
+      renderAllTable();
+    }
 
-      if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="28"><div class="error">暂无数据</div></td></tr>';
-        return;
-      }
-
-      let html = '';
-      data.forEach((player, index) => {
-        const rank = index + 1;
-        const initial = (player.player || '?').charAt(0).toUpperCase();
-        const avatarHtml = player.playerImage 
-          ? `<img src="${player.playerImage}" alt="${player.player}">`
-          : initial;
-
-        html += `
-          <tr style="animation: fadeInUp 0.4s ease-out ${index * 0.02}s both;">
-            <td><span class="rank">${rank}</span></td>
-            <td>
+    function renderPerTable() {
+      const sorted = [...allData].sort((a, b) => (parseFloat(b.per) || 0) - (parseFloat(a.per) || 0)).slice(0, 50);
+      const tbody = document.getElementById('perTableBody');
+      tbody.innerHTML = sorted.map((p, i) => `
+        <tr>
+          <td><span class="rank">${i + 1}</span></td>
+          <td>
+            <div class="player-cell">
+              <img class="player-avatar" src="${p.playerImage || ''}" onerror="this.style.display='none'">
               <div class="player-info">
-                <div class="player-avatar">${avatarHtml}</div>
-                <div>
-                  <div class="player-name">${player.player || '-'}</div>
-                  <div class="player-team">${player.team || ''} ${player.pos || ''}</div>
-                </div>
+                <span class="player-name">${p.player || '-'}</span>
               </div>
-            </td>
-            <td>${player.age || '-'}</td>
-            <td>${player.team || '-'}</td>
-            <td>${player.pos || '-'}</td>
-            <td>${player.g || '-'}</td>
-            <td>${player.gs || '-'}</td>
-            <td>${player.mp || '-'}</td>
-            <td class="${getPerClass(player.per)}">${formatNumber(player.per, 1)}</td>
-            <td>${formatPercent(player.tsPct)}</td>
-            <td>${formatPercent(player.threePar)}</td>
-            <td>${formatPercent(player.ftr)}</td>
-            <td>${formatNumber(player.orbPct, 1)}%</td>
-            <td>${formatNumber(player.drbPct, 1)}%</td>
-            <td>${formatNumber(player.trbPct, 1)}%</td>
-            <td>${formatNumber(player.astPct, 1)}%</td>
-            <td>${formatNumber(player.stlPct, 1)}%</td>
-            <td>${formatNumber(player.blkPct, 1)}%</td>
-            <td>${formatNumber(player.tovPct, 1)}%</td>
-            <td>${formatNumber(player.usgPct, 1)}%</td>
-            <td class="${getWsClass(player.ows)}">${formatNumber(player.ows, 1)}</td>
-            <td class="${getWsClass(player.dws)}">${formatNumber(player.dws, 1)}</td>
-            <td class="${getWsClass(player.ws)}">${formatNumber(player.ws, 1)}</td>
-            <td>${formatNumber(player.ws48, 3)}</td>
-            <td class="${getBpmClass(player.obpm)}">${formatNumber(player.obpm, 1)}</td>
-            <td class="${getBpmClass(player.dbpm)}">${formatNumber(player.dbpm, 1)}</td>
-            <td class="${getBpmClass(player.bpm)}">${formatNumber(player.bpm, 1)}</td>
-            <td class="${getVorpClass(player.vorp)}">${formatNumber(player.vorp, 1)}</td>
-          </tr>
-        `;
-      });
-
-      tbody.innerHTML = html;
+            </div>
+          </td>
+          <td>${p.team || '-'}</td>
+          <td>${p.pos || '-'}</td>
+          <td>${p.g || '-'}</td>
+          <td class="highlight">${parseFloat(p.per || 0).toFixed(1)}</td>
+          <td>${(parseFloat(p.tsPct || 0) * 100).toFixed(1)}%</td>
+          <td>${parseFloat(p.usgPct || 0).toFixed(1)}%</td>
+          <td>${parseFloat(p.ws || 0).toFixed(1)}</td>
+          <td>${parseFloat(p.bpm || 0).toFixed(1)}</td>
+        </tr>
+      `).join('');
     }
 
-    function formatNumber(value, decimals) {
-      if (value === null || value === undefined) return '-';
-      return Number(value).toFixed(decimals);
+    function renderWsTable() {
+      const sorted = [...allData].sort((a, b) => (parseFloat(b.ws) || 0) - (parseFloat(a.ws) || 0)).slice(0, 50);
+      const tbody = document.getElementById('wsTableBody');
+      tbody.innerHTML = sorted.map((p, i) => `
+        <tr>
+          <td><span class="rank">${i + 1}</span></td>
+          <td>
+            <div class="player-cell">
+              <img class="player-avatar" src="${p.playerImage || ''}" onerror="this.style.display='none'">
+              <div class="player-info">
+                <span class="player-name">${p.player || '-'}</span>
+              </div>
+            </div>
+          </td>
+          <td>${p.team || '-'}</td>
+          <td>${parseFloat(p.ows || 0).toFixed(1)}</td>
+          <td>${parseFloat(p.dws || 0).toFixed(1)}</td>
+          <td class="highlight">${parseFloat(p.ws || 0).toFixed(1)}</td>
+          <td>${parseFloat(p.ws48 || 0).toFixed(3)}</td>
+          <td>${parseFloat(p.per || 0).toFixed(1)}</td>
+          <td>${parseFloat(p.bpm || 0).toFixed(1)}</td>
+        </tr>
+      `).join('');
     }
 
-    function formatPercent(value) {
-      if (value === null || value === undefined) return '-';
-      return (Number(value) * 100).toFixed(1) + '%';
+    function renderBpmTable() {
+      const sorted = [...allData].sort((a, b) => (parseFloat(b.bpm) || 0) - (parseFloat(a.bpm) || 0)).slice(0, 50);
+      const tbody = document.getElementById('bpmTableBody');
+      tbody.innerHTML = sorted.map((p, i) => `
+        <tr>
+          <td><span class="rank">${i + 1}</span></td>
+          <td>
+            <div class="player-cell">
+              <img class="player-avatar" src="${p.playerImage || ''}" onerror="this.style.display='none'">
+              <div class="player-info">
+                <span class="player-name">${p.player || '-'}</span>
+              </div>
+            </div>
+          </td>
+          <td>${p.team || '-'}</td>
+          <td>${parseFloat(p.obpm || 0).toFixed(1)}</td>
+          <td>${parseFloat(p.dbpm || 0).toFixed(1)}</td>
+          <td class="highlight">${parseFloat(p.bpm || 0).toFixed(1)}</td>
+          <td>${parseFloat(p.vorp || 0).toFixed(1)}</td>
+          <td>${parseFloat(p.per || 0).toFixed(1)}</td>
+          <td>${parseFloat(p.ws || 0).toFixed(1)}</td>
+        </tr>
+      `).join('');
     }
 
-    function getPerClass(per) {
-      if (!per) return '';
-      if (per >= 25) return 'stat-great';
-      if (per >= 20) return 'stat-good';
-      if (per < 15) return 'stat-bad';
-      return '';
+    function renderVorpTable() {
+      const sorted = [...allData].sort((a, b) => (parseFloat(b.vorp) || 0) - (parseFloat(a.vorp) || 0)).slice(0, 50);
+      const tbody = document.getElementById('vorpTableBody');
+      tbody.innerHTML = sorted.map((p, i) => `
+        <tr>
+          <td><span class="rank">${i + 1}</span></td>
+          <td>
+            <div class="player-cell">
+              <img class="player-avatar" src="${p.playerImage || ''}" onerror="this.style.display='none'">
+              <div class="player-info">
+                <span class="player-name">${p.player || '-'}</span>
+              </div>
+            </div>
+          </td>
+          <td>${p.team || '-'}</td>
+          <td class="highlight">${parseFloat(p.vorp || 0).toFixed(1)}</td>
+          <td>${parseFloat(p.bpm || 0).toFixed(1)}</td>
+          <td>${parseFloat(p.ws || 0).toFixed(1)}</td>
+          <td>${p.mp || '-'}</td>
+          <td>${parseFloat(p.per || 0).toFixed(1)}</td>
+        </tr>
+      `).join('');
     }
 
-    function getWsClass(ws) {
-      if (!ws) return '';
-      if (ws >= 10) return 'stat-great';
-      if (ws >= 5) return 'stat-good';
-      return '';
-    }
-
-    function getVorpClass(vorp) {
-      if (!vorp) return '';
-      if (vorp >= 5) return 'stat-great';
-      if (vorp >= 3) return 'stat-good';
-      return '';
-    }
-
-    function getBpmClass(bpm) {
-      if (!bpm) return '';
-      if (bpm >= 10) return 'stat-great';
-      if (bpm >= 5) return 'stat-good';
-      if (bpm < 0) return 'stat-bad';
-      return '';
-    }
-
-    function showError(message) {
-      const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = `<tr><td colspan="28"><div class="error">${message}</div></td></tr>`;
-    }
-
-    function sortBy(column) {
-      const selectElement = document.getElementById('orderBy');
-      const currentSelected = selectElement.value;
-      
-      if (currentSelected === column) {
-        currentSortDesc = !currentSortDesc;
-      } else {
-        currentSortDesc = true;
-        selectElement.value = column;
+    function renderAllTable() {
+      const limit = document.getElementById('limitSelect').value;
+      let sorted = [...allData].sort((a, b) => (parseFloat(b.per) || 0) - (parseFloat(a.per) || 0));
+      if (limit !== 'all') {
+        sorted = sorted.slice(0, parseInt(limit));
       }
       
-      loadData();
+      const tbody = document.getElementById('allTableBody');
+      tbody.innerHTML = sorted.map((p, i) => `
+        <tr>
+          <td><span class="rank">${i + 1}</span></td>
+          <td>
+            <div class="player-cell">
+              <img class="player-avatar" src="${p.playerImage || ''}" onerror="this.style.display='none'">
+              <div class="player-info">
+                <span class="player-name">${p.player || '-'}</span>
+              </div>
+            </div>
+          </td>
+          <td>${p.team || '-'}</td>
+          <td>${p.pos || '-'}</td>
+          <td class="highlight">${parseFloat(p.per || 0).toFixed(1)}</td>
+          <td>${(parseFloat(p.tsPct || 0) * 100).toFixed(1)}%</td>
+          <td>${(parseFloat(p.threePar || 0) * 100).toFixed(1)}%</td>
+          <td>${(parseFloat(p.ftr || 0) * 100).toFixed(1)}%</td>
+          <td>${parseFloat(p.orbPct || 0).toFixed(1)}%</td>
+          <td>${parseFloat(p.drbPct || 0).toFixed(1)}%</td>
+          <td>${parseFloat(p.trbPct || 0).toFixed(1)}%</td>
+          <td>${parseFloat(p.astPct || 0).toFixed(1)}%</td>
+          <td>${parseFloat(p.stlPct || 0).toFixed(1)}%</td>
+          <td>${parseFloat(p.blkPct || 0).toFixed(1)}%</td>
+          <td>${parseFloat(p.tovPct || 0).toFixed(1)}%</td>
+          <td>${parseFloat(p.usgPct || 0).toFixed(1)}%</td>
+          <td>${parseFloat(p.ows || 0).toFixed(1)}</td>
+          <td>${parseFloat(p.dws || 0).toFixed(1)}</td>
+          <td>${parseFloat(p.ws || 0).toFixed(1)}</td>
+          <td>${parseFloat(p.ws48 || 0).toFixed(3)}</td>
+          <td>${parseFloat(p.obpm || 0).toFixed(1)}</td>
+          <td>${parseFloat(p.dbpm || 0).toFixed(1)}</td>
+          <td>${parseFloat(p.bpm || 0).toFixed(1)}</td>
+          <td>${parseFloat(p.vorp || 0).toFixed(1)}</td>
+        </tr>
+      `).join('');
     }
 
-    document.getElementById('searchName').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const search = e.target.value.toLowerCase();
+      const filtered = allData.filter(p => 
+        (p.player || '').toLowerCase().includes(search) || 
+        (p.team || '').toLowerCase().includes(search)
+      );
+      allData = filtered;
+      renderAllTables();
+      if (!search) {
         loadData();
       }
     });
 
-    document.getElementById('orderBy').addEventListener('change', function() {
-      currentSortDesc = true;
+    document.getElementById('sortBy').addEventListener('change', (e) => {
+      currentSort = e.target.value;
       loadData();
     });
 
-    document.getElementById('limit').addEventListener('change', loadData);
-
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('orderBy').value = 'bpm';
-      loadData();
+    document.getElementById('limitSelect').addEventListener('change', () => {
+      renderAllTable();
     });
+
+    loadData();
   </script>
   <script src="./js/gsap-animations.js"></script>
 </body>

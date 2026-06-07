@@ -13,4 +13,10 @@ public interface TeamMapper {
     
     @Select("SELECT * FROM nbateamstats WHERE teamid = #{teamid}")
     Team findById(Integer teamid);
+    
+    @Select("SELECT * FROM nbateamstats ORDER BY teamrank")
+    List<Team> selectAll();
+    
+    @Select("SELECT * FROM nbateamstats WHERE Team LIKE CONCAT('%', #{name}, '%') LIMIT 1")
+    Team selectByName(String name);
 }

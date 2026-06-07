@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>3D数据展示 · StatCourt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0a1929 0%, #1a2027 50%, #0d1b2a 100%);
+      color: #eaf6fb;
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 100px 20px 40px;
+    }
+    .page-header { text-align: center; margin-bottom: 2rem; }
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+    .page-subtitle { font-size: 1rem; color: #9bd1e3; }
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.5rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      margin-bottom: 2rem;
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .card-title::before {
+      content: '';
+      width: 4px;
+      height: 20px;
+      background: linear-gradient(180deg, #00d4ff, #8b5cf6);
+      border-radius: 2px;
+    }
+    #canvas-container {
+      width: 100%;
+      height: 500px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .control-group label {
+      font-size: 0.85rem;
+      color: #9bd1e3;
+    }
+    .control-group select {
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      color: #fff;
+      font-size: 0.85rem;
+    }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      font-size: 0.9rem;
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); }
+    .legend {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: #9bd1e3;
+    }
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .stat-card {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #00d4ff;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: #9bd1e3;
+      text-transform: uppercase;
+    }
+    .tooltip-3d {
+      position: absolute;
+      background: rgba(10, 25, 41, 0.95);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 100;
+      min-width: 150px;
+    }
+    .tooltip-3d.show { opacity: 1; }
+    .tooltip-3d h4 {
+      color: #00d4ff;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    .tooltip-3d p {
+      color: #9bd1e3;
+      font-size: 0.8rem;
+      margin: 0.25rem 0;
+    }
+    .info-text {
+      font-size: 0.85rem;
+      color: #9bd1e3;
+      margin-top: 1rem;
+      text-align: center;
+    }
+    @media (max-width: 768px) {
+      .page-title { font-size: 2rem; }
+      #canvas-container { height: 400px; }
+      .controls { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <script src="./js/nav.js"></script>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">3D高阶数据展示</h1>
+      <p class="page-subtitle">沉浸式体验NBA高阶数据可视化</p>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">高阶数据3D柱状图</h2>
+      
+      <div class="controls">
+        <div class="control-group">
+          <label>数据类型:</label>
+          <select id="dataType" onchange="updateVisualization()">
+            <option value="per">PER效率值</option>
+            <option value="ws">胜利贡献值(WS)</option>
+            <option value="bpm">BPM</option>
+            <option value="vorp">VORP</option>
+            <option value="usg_pct">使用率(USG%)</option>
+            <option value="ts_pct">真实命中率(TS%)</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>显示数量:</label>
+          <select id="limitCount" onchange="updateVisualization()">
+            <option value="10">Top 10</option>
+            <option value="20" selected>Top 20</option>
+            <option value="30">Top 30</option>
+            <option value="50">Top 50</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>颜色主题:</label>
+          <select id="colorTheme" onchange="updateVisualization()">
+            <option value="gradient">渐变色</option>
+            <option value="team">球队色</option>
+            <option value="rainbow">彩虹色</option>
+          </select>
+        </div>
+        <button class="btn btn-secondary" onclick="resetCamera()">重置视角</button>
+        <button class="btn btn-secondary" onclick="toggleRotation()">自动旋转</button>
+      </div>
+
+      <div id="canvas-container">
+        <div class="tooltip-3d" id="tooltip3d"></div>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-color" style="background: linear-gradient(180deg, #8b5cf6, #6366f1);"></div>
+          <span>高阶数据高低</span>
+        </div>
+      </div>
+
+      <p class="info-text">拖动鼠标旋转视角，滚轮缩放，悬停查看详情</p>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">数据统计</h2>
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-label">总数据量</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statMax">0</div>
+          <div class="stat-label">最高值</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statAvg">0</div>
+          <div class="stat-label">平均值</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statMin">0</div>
+          <div class="stat-label">最低值</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let scene, camera, renderer, bars = [];
+    let allData = [];
+    let isRotating = true;
+    let raycaster, mouse;
+    
+    const teamColors = {
+      'DEN': '#0E2240', 'OKC': '#EF3B24', 'MIL': '#00471B', 'LAL': '#FDB927',
+      'BOS': '#007A33', 'PHI': '#006BB6', 'MIA': '#98002E', 'CLE': '#860038',
+      'NYK': '#F58426', 'GSW': '#1D428A', 'DAL': '#00538C', 'PHX': '#E56020',
+      'SAC': '#5A2D81', 'LAC': '#C8102E', 'MEM': '#5D76A9', 'NOP': '#0C2340',
+      'HOU': '#CE1141', 'SAS': '#C4CED4', 'MIN': '#0C2340', 'POR': '#E03A3E',
+      'UTA': '#002B5C', 'DEN': '#0E2240', 'ATL': '#E03A3E', 'CHA': '#1D1160',
+      'ORL': '#0077C0', 'WAS': '#002B5C', 'CHI': '#CE1141', 'DET': '#C8102E',
+      'IND': '#002D62', 'TOR': '#CE1141', 'BRK': '#000000'
+    };
+
+    function init() {
+      const container = document.getElementById('canvas-container');
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0a1929);
+
+      camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+      camera.position.set(30, 25, 30);
+      camera.lookAt(0, 0, 0);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      container.appendChild(renderer.domElement);
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(10, 20, 10);
+      scene.add(directionalLight);
+
+      const pointLight = new THREE.PointLight(0x8b5cf6, 0.5, 100);
+      pointLight.position.set(0, 30, 0);
+      scene.add(pointLight);
+
+      const gridHelper = new THREE.GridHelper(50, 50, 0x8b5cf6, 0x1a3a4a);
+      gridHelper.position.y = -0.1;
+      scene.add(gridHelper);
+
+      raycaster = new THREE.Raycaster();
+      mouse = new THREE.Vector2();
+
+      container.addEventListener('mousemove', onMouseMove);
+      container.addEventListener('mousedown', onMouseDown);
+      container.addEventListener('mouseup', onMouseUp);
+      container.addEventListener('wheel', onMouseWheel);
+      window.addEventListener('resize', onWindowResize);
+
+      loadData();
+      animate();
+    }
+
+    async function loadData() {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/api/advanced/all?orderBy=per&orderDir=desc&limit=200`);
+        if (res.data.code === 200 || res.data.code === 0) {
+          allData = res.data.data || [];
+          updateVisualization();
+        }
+      } catch (e) {
+        console.error('加载数据失败:', e);
+      }
+    }
+
+    function updateVisualization() {
+      bars.forEach(bar => scene.remove(bar));
+      bars = [];
+
+      const dataType = document.getElementById('dataType').value;
+      const limit = parseInt(document.getElementById('limitCount').value);
+      const colorTheme = document.getElementById('colorTheme').value;
+
+      const sortedData = [...allData].sort((a, b) => {
+        const valA = parseFloat(a[dataType] || 0);
+        const valB = parseFloat(b[dataType] || 0);
+        return valB - valA;
+      }).slice(0, limit);
+
+      const maxValue = Math.max(...sortedData.map(p => parseFloat(p[dataType] || 0)));
+
+      const cols = Math.ceil(Math.sqrt(limit));
+      const spacing = 2;
+
+      sortedData.forEach((player, i) => {
+        const value = parseFloat(player[dataType] || 0);
+        const height = maxValue > 0 ? (value / maxValue) * 15 + 0.5 : 0.5;
+
+        const geometry = new THREE.BoxGeometry(1.5, height, 1.5);
+        
+        let color;
+        if (colorTheme === 'gradient') {
+          const hue = (i / limit) * 0.6 + 0.7;
+          color = new THREE.Color().setHSL(hue % 1, 0.8, 0.5);
+        } else if (colorTheme === 'team') {
+          const teamName = player.team || '';
+          const hexColor = teamColors[teamName] || '#8b5cf6';
+          color = new THREE.Color(hexColor);
+        } else {
+          const hue = (i / limit) * 1;
+          color = new THREE.Color().setHSL(hue, 0.8, 0.5);
+        }
+
+        const material = new THREE.MeshPhongMaterial({
+          color: color,
+          shininess: 100,
+          transparent: true,
+          opacity: 0.9
+        });
+
+        const bar = new THREE.Mesh(geometry, material);
+        
+        const row = Math.floor(i / cols);
+        const col = i % cols;
+        bar.position.x = (col - cols / 2) * spacing;
+        bar.position.z = (row - cols / 2) * spacing;
+        bar.position.y = height / 2;
+
+        bar.userData = {
+          name: player.player || '未知',
+          team: player.team || '',
+          value: value,
+          dataType: dataType,
+          per: player.per || 0,
+          ws: player.ws || 0,
+          bpm: player.bpm || 0,
+          vorp: player.vorp || 0
+        };
+
+        scene.add(bar);
+        bars.push(bar);
+      });
+
+      updateStats(sortedData, dataType);
+    }
+
+    function updateStats(data, dataType) {
+      const values = data.map(p => parseFloat(p[dataType] || 0));
+      
+      document.getElementById('statTotal').textContent = data.length;
+      document.getElementById('statMax').textContent = Math.max(...values).toFixed(2);
+      document.getElementById('statAvg').textContent = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2);
+      document.getElementById('statMin').textContent = Math.min(...values).toFixed(2);
+    }
+
+    function onMouseMove(event) {
+      const container = document.getElementById('canvas-container');
+      const rect = container.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(bars);
+
+      const tooltip = document.getElementById('tooltip3d');
+      if (intersects.length > 0) {
+        const bar = intersects[0].object;
+        const data = bar.userData;
+        
+        const typeLabels = {
+          'per': 'PER', 'ws': 'WS', 'bpm': 'BPM', 'vorp': 'VORP',
+          'usg_pct': 'USG%', 'ts_pct': 'TS%'
+        };
+        
+        tooltip.innerHTML = `
+          <h4>${data.name}</h4>
+          <p>球队: ${data.team}</p>
+          <p>${typeLabels[data.dataType]}: ${data.value.toFixed(2)}</p>
+          <p style="margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
+            PER: ${parseFloat(data.per).toFixed(1)} | WS: ${parseFloat(data.ws).toFixed(1)}<br>
+            BPM: ${parseFloat(data.bpm).toFixed(1)} | VORP: ${parseFloat(data.vorp).toFixed(1)}
+          </p>
+        `;
+        tooltip.style.left = event.clientX - container.getBoundingClientRect().left + 15 + 'px';
+        tooltip.style.top = event.clientY - container.getBoundingClientRect().top + 15 + 'px';
+        tooltip.classList.add('show');
+      } else {
+        tooltip.classList.remove('show');
+      }
+    }
+
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+
+    function onMouseDown(event) {
+      isDragging = true;
+      previousMousePosition = { x: event.clientX, y: event.clientY };
+    }
+
+    function onMouseUp() {
+      isDragging = false;
+    }
+
+    function onMouseWheel(event) {
+      event.preventDefault();
+      camera.position.z += event.deltaY * 0.05;
+      camera.position.z = Math.max(10, Math.min(100, camera.position.z));
+    }
+
+    function onWindowResize() {
+      const container = document.getElementById('canvas-container');
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+    }
+
+    function resetCamera() {
+      camera.position.set(30, 25, 30);
+      camera.lookAt(0, 0, 0);
+    }
+
+    function toggleRotation() {
+      isRotating = !isRotating;
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (isRotating && !isDragging) {
+        scene.rotation.y += 0.002;
+      }
+
+      if (isDragging) {
+        const container = document.getElementById('canvas-container');
+        const rect = container.getBoundingClientRect();
+        const currentMouse = { x: event?.clientX || 0, y: event?.clientY || 0 };
+        const deltaX = currentMouse.x - previousMousePosition.x;
+        const deltaY = currentMouse.y - previousMousePosition.y;
+        
+        scene.rotation.y += deltaX * 0.005;
+        camera.position.y = Math.max(5, Math.min(50, camera.position.y - deltaY * 0.1));
+        
+        previousMousePosition = currentMouse;
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+  <script src="./js/gsap-animations.js"></script>
+</body>
+</html>

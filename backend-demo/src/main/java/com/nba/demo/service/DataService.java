@@ -51,7 +51,7 @@ public class DataService {
     public Team getTeamByName(String teamName) {
         List<Team> teams = teamMapper.findAll();
         for (Team team : teams) {
-            if (team.getTeam() != null && team.getTeam().contains(teamName)) {
+            if (team.getTeamname() != null && team.getTeamname().contains(teamName)) {
                 return team;
             }
         }
